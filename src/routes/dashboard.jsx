@@ -34,15 +34,15 @@ const dashboardRoutes = [
   },
   {
     path: "/table",
-    sidebarName: "Table List",
-    navbarName: "Table List",
+    sidebarName: "Payments",
+    navbarName: "Payments",
     icon: ContentPaste,
     component: TableList
   },
   {
     path: "/typography",
-    sidebarName: "Typography",
-    navbarName: "Typography",
+    sidebarName: "Funding",
+    navbarName: "Funding",
     icon: LibraryBooks,
     component: Typography
   },
