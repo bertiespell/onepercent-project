@@ -33,14 +33,14 @@ const dashboardRoutes = [
     component: UserProfile
   },
   {
-    path: "/table",
+    path: "/payments",
     sidebarName: "Payments",
     navbarName: "Payments",
     icon: ContentPaste,
     component: TableList
   },
   {
-    path: "/typography",
+    path: "/funding",
     sidebarName: "Funding",
     navbarName: "Funding",
     icon: LibraryBooks,
