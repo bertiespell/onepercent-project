@@ -8,6 +8,8 @@ import getWeb3 from './utils/getWeb3'
 
 // Redux Store
 import store from './store'
+import { DrizzleProvider } from 'drizzle-react'
+import drizzleOptions from './drizzleOptions'
 
 import "assets/css/material-dashboard-react.css?v=1.3.0";
 
@@ -24,7 +26,7 @@ getWeb3(process.env.ETHEREUM_NODE)
 })
 
 ReactDOM.render(
-  <Provider store={store}>
+  <DrizzleProvider options={drizzleOptions} store={store}>
     <Router history={hist}>
       <Switch>
         {indexRoutes.map((prop, key) => {
@@ -32,6 +34,6 @@ ReactDOM.render(
         })}
       </Switch>
     </Router>
-  </Provider>,
+  </DrizzleProvider>,
   document.getElementById("root")
 );

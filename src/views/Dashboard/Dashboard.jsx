@@ -1,5 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { connect } from 'react-redux'
+import { drizzleConnect } from 'drizzle-react'
 
 // @material-ui/core
 import withStyles from "@material-ui/core/styles/withStyles";
@@ -34,6 +36,15 @@ class Dashboard extends React.Component {
   handleChangeIndex = index => {
     this.setState({ value: index });
   };
+
+  componentDidUpdate(e) {
+    this.findAccounts();
+  }
+
+  async findAccounts() {
+    console.log(this.props, 'PROPERTY PROP PROP');
+  }
+
   render() {
     const { classes } = this.props;
     return (
@@ -55,7 +66,7 @@ class Dashboard extends React.Component {
                   <Danger>
                     <Warning />
                   </Danger>
-                  <a href="#pablo" onClick={e => e.preventDefault()}>
+                  <a href="#pablo" onClick={() => this.findAccounts()}>
                     Get more space
                   </a>
                 </div>
@@ -123,4 +134,19 @@ Dashboard.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-export default withStyles(dashboardStyle)(Dashboard);
+// May still need this even with data function to refresh component on updates for this contract.
+const mapStateToProps = state => {
+  return {
+    accounts: state.accounts,
+    SimpleStorage: state.contracts.SimpleStorage,
+    TutorialToken: state.contracts.TutorialToken,
+    drizzleStatus: state.drizzleStatus,
+    web3: state.web3
+  }
+}
+
+const mapDispatchToProps = dispatch => {
+  return {}
+}
+
+export default drizzleConnect(withStyles(dashboardStyle)(Dashboard), mapStateToProps, mapDispatchToProps);

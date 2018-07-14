@@ -2,12 +2,20 @@ import React from "react";
 // @material-ui/core components
 import withStyles from "@material-ui/core/styles/withStyles";
 import Grid from "@material-ui/core/Grid";
+
+import PropTypes from 'prop-types';
 // core components
 import GridItem from "components/Grid/GridItem.jsx";
 import Table from "components/Table/Table.jsx";
 import Card from "components/Card/Card.jsx";
 import CardHeader from "components/Card/CardHeader.jsx";
 import CardBody from "components/Card/CardBody.jsx";
+
+import InputAdornment from "@material-ui/core/InputAdornment";
+// @material-ui/icons
+import MonetizationOn from "@material-ui/icons/MonetizationOn";
+//core components
+import CustomInput from "components/CustomInput/CustomInput.jsx";
 
 const styles = {
   cardCategoryWhite: {
@@ -105,8 +113,57 @@ function Payments(props) {
           </CardBody>
         </Card>
       </GridItem>
+      <Grid container>
+        <GridItem xs={12} sm={12} md={4}>
+          <CustomInput
+            labelText="Send from Address"
+            id="success"
+            success
+            formControlProps={{
+              fullWidth: true
+            }}
+          />
+        </GridItem>
+        <GridItem xs={12} sm={12} md={4}>
+          <CustomInput
+            labelText="Send to Address"
+            id="error"
+            error
+            formControlProps={{
+              fullWidth: true
+            }}
+          />
+        </GridItem>
+        <GridItem xs={12} sm={12} md={4}>
+          <CustomInput
+            labelText="Amount"
+            id="material"
+            formControlProps={{
+              fullWidth: true
+            }}
+            inputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <MonetizationOn />
+                </InputAdornment>
+              )
+            }}
+          />
+        </GridItem>
+      </Grid>
     </Grid>
   );
 }
+
+CustomInput.propTypes = {
+  labelText: PropTypes.node,
+  labelProps: PropTypes.object,
+  id: PropTypes.string,
+  inputProps: PropTypes.object,
+  formControlProps: PropTypes.object,
+  error: PropTypes.bool,
+  success: PropTypes.bool
+};
+
 
 export default withStyles(styles)(Payments);
