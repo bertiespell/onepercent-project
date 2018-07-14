@@ -38,11 +38,11 @@ class Dashboard extends React.Component {
   };
 
   componentDidUpdate(e) {
-    this.findAccounts();
   }
 
   async findAccounts() {
     console.log(this.props, 'PROPERTY PROP PROP');
+    console.log(this.props.SimpleStorage)
   }
 
   render() {
