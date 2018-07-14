@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { connect } from 'react-redux'
 
 // @material-ui/core
 import withStyles from "@material-ui/core/styles/withStyles";
@@ -34,6 +35,15 @@ class Dashboard extends React.Component {
   handleChangeIndex = index => {
     this.setState({ value: index });
   };
+
+  componentDidUpdate(e) {
+    this.findAccounts();
+  }
+
+  findAccounts() {
+    const { web3 } = this.props;
+  }
+
   render() {
     const { classes } = this.props;
     return (
@@ -123,4 +133,15 @@ Dashboard.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-export default withStyles(dashboardStyle)(Dashboard);
+
+const mapStateToProps = (state) => {
+  return {
+    web3: state.web3
+  }
+}
+
+const mapDispatchToProps = dispatch => {
+  return {}
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(dashboardStyle)(Dashboard));
