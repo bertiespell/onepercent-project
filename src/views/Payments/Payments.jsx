@@ -39,16 +39,16 @@ const styles = {
   }
 };
 
-function TableList(props) {
+function Payments(props) {
   const { classes } = props;
   return (
     <Grid container>
       <GridItem xs={12} sm={12} md={12}>
         <Card>
           <CardHeader color="primary">
-            <h4 className={classes.cardTitleWhite}>Simple Table</h4>
+            <h4 className={classes.cardTitleWhite}>Payments</h4>
             <p className={classes.cardCategoryWhite}>
-              Here is a subtitle for this table
+              All payments to date
             </p>
           </CardHeader>
           <CardBody>
@@ -109,4 +109,4 @@ function TableList(props) {
   );
 }
 
-export default withStyles(styles)(TableList);
+export default withStyles(styles)(Payments);
