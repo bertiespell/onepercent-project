@@ -68,8 +68,8 @@ class Dashboard extends React.Component {
                 <CardIcon color="success">
                   <Store />
                 </CardIcon>
-                <p className={classes.cardCategory}>Tokens</p>
-                <h3 className={classes.cardTitle}>21 OPC</h3>
+                <p className={classes.cardCategory}>OPC Tokens</p>
+                <h3 className={classes.cardTitle}>21</h3>
               </CardHeader>
               <CardFooter stats>
                 <div className={classes.stats}>
