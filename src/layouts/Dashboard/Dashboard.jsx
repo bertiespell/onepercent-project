@@ -1,5 +1,6 @@
 /* eslint-disable */
 import React from "react";
+import { connect } from 'react-redux'
 import PropTypes from "prop-types";
 import { Switch, Route, Redirect } from "react-router-dom";
 // creates a beautiful scrollbar
@@ -52,6 +53,11 @@ class App extends React.Component {
       }
     }
   }
+
+  findAccounts() {
+    const { web3 } = this.props;
+  }
+
   render() {
     const { classes, ...rest } = this.props;
     return (
@@ -91,4 +97,14 @@ App.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-export default withStyles(dashboardStyle)(App);
+const mapStateToProps = (state) => {
+  return {
+    web3: state.web3
+  }
+}
+
+const mapDispatchToProps = dispatch => {
+  return {}
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(dashboardStyle)(App));
