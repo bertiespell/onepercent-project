@@ -2,6 +2,7 @@ import React from "react";
 // @material-ui/core components
 import withStyles from "@material-ui/core/styles/withStyles";
 import Grid from "@material-ui/core/Grid";
+import Select from '@material-ui/core/Select';
 
 import PropTypes from 'prop-types';
 // core components
@@ -16,6 +17,7 @@ import InputAdornment from "@material-ui/core/InputAdornment";
 import MonetizationOn from "@material-ui/icons/MonetizationOn";
 //core components
 import CustomInput from "components/CustomInput/CustomInput.jsx";
+import CustomDropdown from "components/CustomDropdown/CustomDropdown.jsx";
 
 const styles = {
   cardCategoryWhite: {
@@ -115,10 +117,7 @@ function Payments(props) {
       </GridItem>
       <Grid container>
         <GridItem xs={12} sm={12} md={4}>
-          <CustomInput
-            labelText="Send from Address"
-            id="success"
-            success
+          <CustomDropdown
             formControlProps={{
               fullWidth: true
             }}
