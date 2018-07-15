@@ -26,6 +26,12 @@ import CardFooter from "components/Card/CardFooter.jsx";
 import dashboardStyle from "assets/jss/material-dashboard-react/views/dashboardStyle.jsx";
 
 class Dashboard extends React.Component {
+
+  constructor(props, context) {
+    super(props)
+    this.contracts = context.drizzle.contracts
+  }
+
   state = {
     value: 0
   };
@@ -41,8 +47,8 @@ class Dashboard extends React.Component {
   }
 
   async findAccounts() {
-    console.log(this.props, 'PROPERTY PROP PROP');
-    console.log(this.props.SimpleStorage)
+    console.log(this.contracts)
+    console.log(this.props)
   }
 
   render() {
@@ -133,6 +139,10 @@ class Dashboard extends React.Component {
 Dashboard.propTypes = {
   classes: PropTypes.object.isRequired
 };
+
+Dashboard.contextTypes = {
+  drizzle: PropTypes.object
+}
 
 // May still need this even with data function to refresh component on updates for this contract.
 const mapStateToProps = state => {
