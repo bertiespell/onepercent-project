@@ -1,6 +1,5 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { connect } from 'react-redux'
 import { drizzleConnect } from 'drizzle-react'
 
 // @material-ui/core
@@ -47,8 +46,7 @@ class Dashboard extends React.Component {
   }
 
   async findAccounts() {
-    console.log(this.contracts)
-    console.log(this.props)
+    this.contracts.TutorialToken.methods.transfer(this.contracts.TutorialToken.address, 1000).send()
   }
 
   render() {

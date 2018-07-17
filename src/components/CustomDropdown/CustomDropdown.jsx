@@ -40,6 +40,7 @@ function CustomDropdown({ ...props }) {
   return (
     <Select
       {...formControlProps}
+      value={5}
       className={formControlProps.className + " " + classes.formControl}
     >
       {labelText !== undefined ? (
