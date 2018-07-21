@@ -133,26 +133,24 @@ class Payments extends React.Component {
             <CardBody>
               <Table
                 tableHeaderColor="primary"
-                tableHead={["ID", "Name", "Country", "City", "Salary"]}
+                tableHead={["From", "To", "Amount", "Date"]}
                 tableData={[
-                  ["1", "Dakota Rice", "$36,738", "Niger", "Oud-Turnhout"],
-                  ["2", "Minerva Hooper", "$23,789", "Curaçao", "Sinaai-Waas"],
-                  ["3", "Sage Rodriguez", "$56,142", "Netherlands", "Baileux"],
+                  ["1", "Dakota Rice", "$36,738", "Niger"],
+                  ["2", "Minerva Hooper", "$23,789", "Curaçao"],
+                  ["3", "Sage Rodriguez", "$56,142", "Netherlands"],
                   [
                     "4",
                     "Philip Chaney",
                     "$38,735",
-                    "Korea, South",
-                    "Overland Park"
+                    "Korea, South"
                   ],
                   [
                     "5",
                     "Doris Greene",
                     "$63,542",
-                    "Malawi",
-                    "Feldkirchen in Kärnten"
+                    "Malawi"
                   ],
-                  ["6", "Mason Porter", "$78,615", "Chile", "Gloucester"]
+                  ["6", "Mason Porter", "$78,615", "Chile"]
                 ]}
               />
             </CardBody>

@@ -69,7 +69,7 @@ class ContractData extends Component {
       const displayListItems = displayData.map((datum, index) => {
         <li key={index}>{datum}{pendingSpinner}</li>
       })
-      
+
       return(
         <ul>
           {displayListItems}
@@ -81,7 +81,7 @@ class ContractData extends Component {
     if (typeof displayData === 'object') {
       var i = 0
       const displayObjectProps = []
-      
+
       Object.keys(displayData).forEach((key) => {
         if (i != key) {
           displayObjectProps.push(<li key={i}>
@@ -92,7 +92,7 @@ class ContractData extends Component {
 
         i++
       })
-      
+
       return(
         <ul>
           {displayObjectProps}

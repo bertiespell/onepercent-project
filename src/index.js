@@ -10,6 +10,7 @@ import getWeb3 from './utils/getWeb3'
 import store from './store'
 import { DrizzleProvider } from 'drizzle-react'
 import drizzleOptions from './drizzleOptions'
+import LoadingContainer from './components/drizzle-react-components/LoadingContainer';
 
 import "assets/css/material-dashboard-react.css?v=1.3.0";
 
@@ -27,13 +28,15 @@ getWeb3(process.env.ETHEREUM_NODE)
 
 ReactDOM.render(
   <DrizzleProvider options={drizzleOptions} store={store}>
-    <Router history={hist}>
-      <Switch>
-        {indexRoutes.map((prop, key) => {
-          return <Route path={prop.path} component={prop.component} key={key} />;
-        })}
-      </Switch>
-    </Router>
+    <LoadingContainer>
+      <Router history={hist}>
+        <Switch>
+          {indexRoutes.map((prop, key) => {
+            return <Route path={prop.path} component={prop.component} key={key} />;
+          })}
+        </Switch>
+      </Router>
+    </LoadingContainer>
   </DrizzleProvider>,
   document.getElementById("root")
 );

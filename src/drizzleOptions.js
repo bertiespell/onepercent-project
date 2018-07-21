@@ -1,8 +1,6 @@
-import ComplexStorage from './ABI/build/contracts/ComplexStorage.json'
-import SimpleStorage from './ABI/build/contracts/SimpleStorage.json'
 import TutorialToken from './ABI/build/contracts/TutorialToken.json'
-import PayableExample from './ABI/build/contracts/PayableExample.json';
 import PaymentPipe from './ABI/build/contracts/PaymentPipe.json';
+import ExternalContractExample from './ABI/build/contracts/ExternalContractExample.json';
 
 const drizzleOptions = {
   web3: {
@@ -13,14 +11,13 @@ const drizzleOptions = {
     }
   },
   contracts: [
-    ComplexStorage,
-    SimpleStorage,
     TutorialToken,
-    PayableExample,
+    ExternalContractExample,
     PaymentPipe
   ],
   events: {
-    SimpleStorage: ['StorageSet']
+    SimpleStorage: ['StorageSet'],
+    ExternalContractExample: ['ExternalContractPaid']
   },
   polls: {
     accounts: 1500

@@ -1,14 +1,20 @@
 pragma solidity ^0.4.23;
 
-contract PayableExample {
+contract ExternalContractExample {
 
   uint public totalPaidIn;
 
+  event ExternalContractPaid(
+    string _message,
+    uint amount
+  );
+
   constructor () {
-    totalPaidIn = 0;
+    totalPaidIn = 10;
   }
 
-  function paymentExample(uint amount) public payable {
+  function paymentExample() public payable {
     totalPaidIn += msg.value;
+    emit ExternalContractPaid('External Contract was paid!', msg.value);
   }
 }
