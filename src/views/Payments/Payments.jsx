@@ -1,7 +1,7 @@
 import React from "react";
 import { drizzleConnect } from 'drizzle-react'
 import { ContractData, ContractForm } from "components/drizzle-react-components";
-import web3 from 'web3';
+import Web3 from 'web3';
 
 // @material-ui/core components
 import withStyles from "@material-ui/core/styles/withStyles";
@@ -25,6 +25,7 @@ import CustomDropdown from "components/CustomDropdown/CustomDropdown.jsx";
 import Button from 'components/CustomButtons/Button.jsx';
 
 import seedData from '../../utils/seedData';
+import getRandomInt from '../../utils/maths/getRandomNumber';
 
 const styles = {
   cardCategoryWhite: {
@@ -59,36 +60,44 @@ const styles = {
 class Payments extends React.Component {
 
   paymentsMade; // ["From", "To", "Amount", "Date"]
+  availableGanacheAccounts;
 
   constructor(props, context) {
     super(props);
     this.contracts = context.drizzle.contracts;
+    console.log(this.props, this.context);
+    this.findGanacheAccounts();
+  }
+
+  async findGanacheAccounts() {
+    this.availableGanacheAccounts = await new Web3(new Web3.providers.HttpProvider('http://localhost:7545')).eth.getAccounts();
+    console.log(this.availableGanacheAccounts)
   }
 
   async seedData() {
-    // TODO: Figure out how to return other account addressses through web3 or drizzle so this doesn't have to be hardcoded
-    // NOTE: Metamask seems to only return the active account when you do getAccounts(), consider getting these separately by using the following:
-    // new Web3(new Web3.providers.HttpProvider('http://localhost:7545')).eth.getAccounts((err, accounts) => { console.log(err, accounts); });
-    // Can also get the localhost port from ENV variable
-    await seedData(this.context.drizzle, this.props.accounts[0]);
+    console.log(this.props, this.context, this.contracts.ExternalContractExample.address, this.props.accounts[0]);
+
+    await this.contracts.PaymentPipe.methods.callExternalContractWithOnePercentTax(this.contracts.ExternalContractExample.address, "paymentExample()").send({from: this.props.accounts[0], value: this.context.drizzle.web3.utils.toWei("10.0", "ether"), gasPrice: 10});
   }
 
   componentDidUpdate(e) {
-    console.log(this.context.drizzle, this.props);
-    // var balance = this.props.accountBalances[this.props.accounts[0]];
-    console.log(this.props.accountBalances)
-
-
   }
 
   async makeNewPayment() {
-    await this.contracts.PaymentPipe.methods.payAccountWithOnePercentTax('0xedda29b72b2505382cc345c08f85ce53e0a65de7').send({from: this.props.accounts[0], value: this.context.drizzle.web3.utils.toWei("10.0", "ether"), gasPrice: 0});
+    let contractIndex = getRandomInt(10);
+    while (this.props.accounts[0] === this.availableGanacheAccounts[contractIndex]) {
+      contractIndex = getRandomInt(10);
+    }
+    console.log('!!!:)', this.availableGanacheAccounts[contractIndex])
+    await this.contracts.PaymentPipe.methods.payAccountWithOnePercentTax(this.availableGanacheAccounts[contractIndex]).send({from: this.props.accounts[0], value: this.context.drizzle.web3.utils.toWei("10.0", "ether"), gasPrice: 10});
   }
 
   render() {
     const { classes } = this.props;
     return (
       <Grid container>
+      <p><strong>My Balance</strong>: <ContractData contract="PaymentPipe" method="getTotalFunds" /></p>
+
         <GridItem xs={12} sm={12} md={12}>
           <Button
             onClick={this.seedData.bind(this)}
