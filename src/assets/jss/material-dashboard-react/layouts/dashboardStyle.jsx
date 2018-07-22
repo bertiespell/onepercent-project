@@ -19,7 +19,7 @@ const appStyle = theme => ({
     overflow: "auto",
     position: "relative",
     float: "right",
-    backgroundImage: `url(${img})`,
+    // backgroundImage: `url(${img})`,
     ...transition,
     maxHeight: "100%",
     width: "100%",

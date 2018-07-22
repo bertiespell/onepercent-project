@@ -22,9 +22,17 @@ import CardHeader from "components/Card/CardHeader.jsx";
 import CardIcon from "components/Card/CardIcon.jsx";
 import CardFooter from "components/Card/CardFooter.jsx";
 
+import { ContractData } from "components/drizzle-react-components";
+
+
 import dashboardStyle from "assets/jss/material-dashboard-react/views/dashboardStyle.jsx";
 
 class Dashboard extends React.Component {
+
+  paymentsMade = 0;
+  UserOPCTokens;
+  personallyGenerated;
+  globallyGenerated;
 
   constructor(props, context) {
     super(props)
@@ -43,6 +51,16 @@ class Dashboard extends React.Component {
   };
 
   componentDidUpdate(e) {
+    this.generateDashboardData();
+  }
+
+  generateDashboardData() {
+    const state = this.context.drizzle.store.getState();
+    this.paymentsMade = state.transactionStack.length;
+    console.log(state, this.context, this.props);
+    // this.UserOPCTokens = this.context.drizzle.coinBalances(this.props.accounts[0])
+    // this.personallyGenerated = state.get
+    // this.personallyGenerate
   }
 
   async findAccounts() {
@@ -62,7 +80,7 @@ class Dashboard extends React.Component {
                 </CardIcon>
                 <p className={classes.cardCategory}>Payments Made</p>{/*number of payments made by user*/}
                 <h3 className={classes.cardTitle}>
-                  15
+                  {this.paymentsMade}
                 </h3>
               </CardHeader>
               <CardFooter stats>
