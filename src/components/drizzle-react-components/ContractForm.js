@@ -26,8 +26,8 @@ class ContractForm extends Component {
         if (abi[i].name === this.props.method) {
             this.inputs = abi[i].inputs;
 
-            for (var i = 0; i < this.inputs.length; i++) {
-                initialState[this.inputs[i].name] = '';
+            for (var j = 0; j < this.inputs.length; j++) {
+                initialState[this.inputs[j].name] = '';
             }
 
             break;
@@ -49,13 +49,10 @@ class ContractForm extends Component {
     switch(true) {
         case /^uint/.test(type):
             return 'number'
-            break
         case /^string/.test(type) || /^bytes/.test(type):
             return 'text'
-            break
         case /^bool/.test(type):
             return 'checkbox'
-            break
         default:
             return 'text'
     }
@@ -64,7 +61,7 @@ class ContractForm extends Component {
   render() {
     return (
       <form className="pure-form pure-form-stacked">
-        {this.inputs.map((input, index) => {            
+        {this.inputs.map((input, index) => {
             var inputType = this.translateType(input.type)
             var inputLabel = this.props.labels ? this.props.labels[index] : input.name
             // check if input type is struct and if so loop out struct fields as well

@@ -18,7 +18,7 @@ class LoadingContainer extends Component {
         <main className="container loading-screen">
           <div className="pure-g">
             <div className="pure-u-1-1">
-              <h1>⚠️</h1>
+              <h1><span role="img" aria-label="Warning">⚠️</span></h1>
               <p>This browser has no connection to the Ethereum network. Please use the Chrome/FireFox extension MetaMask, or dedicated Ethereum browsers Mist or Parity.</p>
             </div>
           </div>
@@ -32,7 +32,7 @@ class LoadingContainer extends Component {
         <main className="container loading-screen">
           <div className="pure-g">
             <div className="pure-u-1-1">
-              <h1>🦊</h1>
+              <h1><span role="img" aria-label="Cat">🦊</span></h1>
               <p><strong>We can't find any Ethereum accounts!</strong> Please check and make sure Metamask or you browser are pointed at the correct network and your account is unlocked.</p>
             </div>
           </div>
@@ -53,7 +53,7 @@ class LoadingContainer extends Component {
       <main className="container loading-screen">
         <div className="pure-g">
           <div className="pure-u-1-1">
-            <h1>⚙️</h1>
+            <h1><span role="img" aria-label="Loading">⚙️</span></h1>
             <p>Loading dapp...</p>
           </div>
         </div>
