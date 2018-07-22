@@ -95,6 +95,8 @@ class Payments extends React.Component {
     state.transactionStack.forEach((transactionHash, index) => {
       if (state.transactions[transactionHash].status === "success") {
         this.tableData.push(this.transactionIndexToData[index]);
+      } else if (state.transactions[transactionHash].status === "pending") {
+        this.tableData.push(['Loading...'])
       }
     });
   }
