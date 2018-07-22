@@ -1,6 +1,6 @@
-import TutorialToken from './ABI/build/contracts/TutorialToken.json'
-import PaymentPipe from './ABI/build/contracts/PaymentPipe.json';
-import ExternalContractExample from './ABI/build/contracts/ExternalContractExample.json';
+import TutorialToken from '../build/contracts/TutorialToken.json'
+import PaymentPipe from '../build/contracts/PaymentPipe.json';
+import ExternalContractExample from '../build/contracts/ExternalContractExample.json';
 
 const drizzleOptions = {
   web3: {

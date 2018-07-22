@@ -1,12 +1,11 @@
 import React from "react";
 import { drizzleConnect } from 'drizzle-react'
-import { ContractData, ContractForm } from "components/drizzle-react-components";
+import { ContractData } from "components/drizzle-react-components";
 import Web3 from 'web3';
 
 // @material-ui/core components
 import withStyles from "@material-ui/core/styles/withStyles";
 import Grid from "@material-ui/core/Grid";
-import Select from '@material-ui/core/Select';
 
 import PropTypes from 'prop-types';
 // core components
@@ -24,7 +23,6 @@ import CustomInput from "components/CustomInput/CustomInput.jsx";
 import CustomDropdown from "components/CustomDropdown/CustomDropdown.jsx";
 import Button from 'components/CustomButtons/Button.jsx';
 
-import seedData from '../../utils/seedData';
 import getRandomInt from '../../utils/maths/getRandomNumber';
 
 const styles = {
@@ -65,18 +63,14 @@ class Payments extends React.Component {
   constructor(props, context) {
     super(props);
     this.contracts = context.drizzle.contracts;
-    console.log(this.props, this.context);
     this.findGanacheAccounts();
   }
 
   async findGanacheAccounts() {
     this.availableGanacheAccounts = await new Web3(new Web3.providers.HttpProvider('http://localhost:7545')).eth.getAccounts();
-    console.log(this.availableGanacheAccounts)
   }
 
   async seedData() {
-    console.log(this.props, this.context, this.contracts.ExternalContractExample.address, this.props.accounts[0]);
-
     await this.contracts.PaymentPipe.methods.callExternalContractWithOnePercentTax(this.contracts.ExternalContractExample.address, "paymentExample()").send({from: this.props.accounts[0], value: this.context.drizzle.web3.utils.toWei("10.0", "ether"), gasPrice: 10});
   }
 
@@ -88,7 +82,6 @@ class Payments extends React.Component {
     while (this.props.accounts[0] === this.availableGanacheAccounts[contractIndex]) {
       contractIndex = getRandomInt(10);
     }
-    console.log('!!!:)', this.availableGanacheAccounts[contractIndex])
     await this.contracts.PaymentPipe.methods.payAccountWithOnePercentTax(this.availableGanacheAccounts[contractIndex]).send({from: this.props.accounts[0], value: this.context.drizzle.web3.utils.toWei("10.0", "ether"), gasPrice: 10});
   }
 
@@ -248,6 +241,3 @@ const mapDispatchToProps = dispatch => {
 }
 
 export default drizzleConnect(withStyles(styles)(Payments), mapStateToProps, mapDispatchToProps);
-
-
-// export default withStyles(styles)(Payments);
