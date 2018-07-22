@@ -8,7 +8,19 @@ contract('PaymentPipe', function(accounts) {
     const bob = accounts[2];
     const emptyAddress = '0x0000000000000000000000000000000000000000';
 
-    let value = web3.toWei(10, "ether");
+    let value = web3.toWei(1, "ether");
+
+    it("payment pipe ether amount should be accessed via getTotalFunds method", async () => {
+      const paymentPipe = await PaymentPipe.deployed();
+
+      await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, value: value, gasPrice: 0});
+
+      var paymentPipeFundValue = await paymentPipe.getTotalFunds.call();
+
+      const balance = await paymentPipeFundValue.toNumber();
+
+      assert.equal(balance, value/100);
+    });
 
     it("should transfer money to external account", async() => {
         const paymentPipe = await PaymentPipe.deployed();
@@ -38,7 +50,6 @@ contract('PaymentPipe', function(accounts) {
     });
 
     it("should pay an external contract, which is itself payable", async () => {
-      value = web3.toWei(5, "ether");
       const paymentPipe = await PaymentPipe.deployed();
       const externalAccount = await ExternalContractExample.deployed();
       var aliceBalanceBefore = await web3.eth.getBalance(alice).toNumber();

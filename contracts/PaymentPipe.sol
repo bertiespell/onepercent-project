@@ -8,6 +8,11 @@ contract PaymentPipe {
     string _message
   );
 
+  event GetTotalFunds(
+    string _message,
+    uint totalfunds
+  );
+
   uint public totalFunds;
 
   address public owner;
@@ -57,7 +62,8 @@ contract PaymentPipe {
     emit ExternalContractCall('External Contract call made with amount!');
   }
 
-  function getTotalFunds() view returns (uint totalFunds) {
+  function getTotalFunds() public returns (uint) {
+    emit GetTotalFunds('total funds', totalFunds);
     return totalFunds;
   }
 }
