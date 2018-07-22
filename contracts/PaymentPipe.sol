@@ -1,5 +1,7 @@
 pragma solidity ^0.4.23;
 
+import "./ConvertLib.sol";
+
 contract PaymentPipe {
 
   address externalContractAddress;
@@ -23,9 +25,9 @@ contract PaymentPipe {
     owner = msg.sender;
   }
 
-  function getCoinBalance() returns (uint){
+  /* function getCoinBalance() returns (uint){
     return coinBalances[msg.sender];
-  }
+  } */
 
   function payAccountWithOnePercentTax(address externalAccount) payable {
     uint onePercent = msg.value/100;
@@ -74,4 +76,13 @@ contract PaymentPipe {
     emit GetTotalFunds('total funds', totalFunds);
     return totalFunds;
   }
+
+
+  function getCoinBalanceInEth() public view returns(uint){
+		return ConvertLib.convert(getCoinBalance(),2);
+	}
+
+	function getCoinBalance() public view returns(uint) {
+		return coinBalances[msg.sender];
+	}
 }

@@ -102,7 +102,9 @@ class Dashboard extends React.Component {
                   <Store />
                 </CardIcon>
                 <p className={classes.cardCategory}>OPC Tokens</p>
-                <h3 className={classes.cardTitle}>21</h3>
+                <h3 className={classes.cardTitle}>
+                  <ContractData contract="PaymentPipe" method="getCoinBalance"/>
+                </h3>
               </CardHeader>
               <CardFooter stats>
                 <div className={classes.stats}>

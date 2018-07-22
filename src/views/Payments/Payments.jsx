@@ -93,11 +93,11 @@ class Payments extends React.Component {
     const state = this.drizzle.store.getState();
 
     state.transactionStack.forEach((transactionHash, index) => {
-      if (state.transactions[transactionHash].status === "success") {
-        this.tableData.push(this.transactionIndexToData[index]);
-      } else if (state.transactions[transactionHash].status === "pending") {
-        this.tableData.push(['Loading...'])
-      }
+        if (state.transactions[transactionHash].status === "success") {
+           this.tableData.push(this.transactionIndexToData[index]);
+         } else if (state.transactions[transactionHash].status === "pending") {
+           this.tableData.push(['Loading...'])
+         }
     });
   }
 
