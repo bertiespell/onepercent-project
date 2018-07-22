@@ -57,12 +57,14 @@ const styles = {
 
 class Payments extends React.Component {
 
-  paymentsMade; // ["From", "To", "Amount", "Date"]
   availableGanacheAccounts;
+  tableData = [];
+  transactionIndexToData = [];
 
   constructor(props, context) {
     super(props);
     this.contracts = context.drizzle.contracts;
+    this.drizzle = context.drizzle;
     this.findGanacheAccounts();
   }
 
@@ -71,25 +73,65 @@ class Payments extends React.Component {
   }
 
   async seedData() {
-    await this.contracts.PaymentPipe.methods.callExternalContractWithOnePercentTax(this.contracts.ExternalContractExample.address, "paymentExample()").send({from: this.props.accounts[0], value: this.context.drizzle.web3.utils.toWei("10.0", "ether"), gasPrice: 10});
+    const amount = this.context.drizzle.web3.utils.toWei(getRandomInt(10).toString(), "ether");
+    const date = new Date(Date.now()).toString();
+
+    const payment = [
+      this.props.accounts[0],
+      this.contracts.ExternalContractExample.address,
+      this.context.drizzle.web3.utils.fromWei(amount) + " Ether",
+      date
+    ]
+
+    const transactionIndex = await this.contracts.PaymentPipe.methods.callExternalContractWithOnePercentTax.cacheSend(this.contracts.ExternalContractExample.address, "paymentExample()", {from: this.props.accounts[0], value: amount, gasPrice: 10});
+    this.transactionIndexToData[transactionIndex] = payment;
+  }
+
+  buildTableData() {
+    this.tableData = [];
+
+    const state = this.drizzle.store.getState();
+
+    state.transactionStack.forEach((transactionHash, index) => {
+      if (state.transactions[transactionHash].status === "success") {
+        this.tableData.push(this.transactionIndexToData[index]);
+      } else if (state.transactions[transactionHash].status === "pending") {
+        this.tableData.push(['Loading...'])
+      }
+    });
   }
 
   componentDidUpdate(e) {
+    this.buildTableData();
   }
 
   async makeNewPayment() {
-    let contractIndex = getRandomInt(10);
-    while (this.props.accounts[0] === this.availableGanacheAccounts[contractIndex]) {
-      contractIndex = getRandomInt(10);
+    let accountIndex = getRandomInt(10);
+    while (this.props.accounts[0] === this.availableGanacheAccounts[accountIndex]) {
+      accountIndex = getRandomInt(10);
     }
-    await this.contracts.PaymentPipe.methods.payAccountWithOnePercentTax(this.availableGanacheAccounts[contractIndex]).send({from: this.props.accounts[0], value: this.context.drizzle.web3.utils.toWei("10.0", "ether"), gasPrice: 10});
+
+    const amount = this.context.drizzle.web3.utils.toWei(getRandomInt(10).toString(), "ether");
+    const date = new Date(Date.now()).toString();
+
+    const payment = [
+      this.props.accounts[0],
+      this.availableGanacheAccounts[accountIndex],
+      this.context.drizzle.web3.utils.fromWei(amount) + " Ether",
+      date
+    ]
+
+    const transactionIndex = await this.contracts.PaymentPipe.methods.payAccountWithOnePercentTax.cacheSend(this.availableGanacheAccounts[accountIndex], {from: this.props.accounts[0], value: amount, gasPrice: 10});
+    this.transactionIndexToData[transactionIndex] = payment;
   }
 
   render() {
     const { classes } = this.props;
     return (
       <Grid container>
-      <p><strong>My Balance</strong>: <ContractData contract="PaymentPipe" method="getTotalFunds" /></p>
+      <p><strong>My Balance</strong>:
+
+        <ContractData contract="PaymentPipe" method="totalFunds" /></p>
 
         <GridItem xs={12} sm={12} md={12}>
           <Button
@@ -110,50 +152,7 @@ class Payments extends React.Component {
               <Table
                 tableHeaderColor="primary"
                 tableHead={["From", "To", "Amount", "Date"]}
-                tableData={[
-                  ["Dakota Rice", "Niger", "Oud-Turnhout", "$36,738"],
-                  ["Minerva Hooper", "Curaçao", "Sinaai-Waas", "$23,789"],
-                  ["Sage Rodriguez", "Netherlands", "Baileux", "$56,142"],
-                  ["Philip Chaney", "Korea, South", "Overland Park", "$38,735"],
-                  ["Doris Greene", "Malawi", "Feldkirchen in Kärnten", "$63,542"],
-                  ["Mason Porter", "Chile", "Gloucester", "$78,615"]
-                ]}
-              />
-            </CardBody>
-          </Card>
-        </GridItem>
-        <GridItem xs={12} sm={12} md={12}>
-          <Card plain>
-            <CardHeader plain color="primary">
-              <h4 className={classes.cardTitleWhite}>
-                Table on Plain Background
-              </h4>
-              <p className={classes.cardCategoryWhite}>
-                Here is a subtitle for this table
-              </p>
-            </CardHeader>
-            <CardBody>
-              <Table
-                tableHeaderColor="primary"
-                tableHead={["From", "To", "Amount", "Date"]}
-                tableData={[
-                  ["1", "Dakota Rice", "$36,738", "Niger"],
-                  ["2", "Minerva Hooper", "$23,789", "Curaçao"],
-                  ["3", "Sage Rodriguez", "$56,142", "Netherlands"],
-                  [
-                    "4",
-                    "Philip Chaney",
-                    "$38,735",
-                    "Korea, South"
-                  ],
-                  [
-                    "5",
-                    "Doris Greene",
-                    "$63,542",
-                    "Malawi"
-                  ],
-                  ["6", "Mason Porter", "$78,615", "Chile"]
-                ]}
+                tableData={this.tableData}
               />
             </CardBody>
           </Card>
