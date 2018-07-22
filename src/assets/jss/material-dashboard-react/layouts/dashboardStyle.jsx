@@ -4,6 +4,8 @@ import {
   container
 } from "assets/jss/material-dashboard-react.jsx";
 
+import img from '../../../img/bg-01.jpg';
+
 const appStyle = theme => ({
   wrapper: {
     position: "relative",
@@ -17,6 +19,7 @@ const appStyle = theme => ({
     overflow: "auto",
     position: "relative",
     float: "right",
+    backgroundImage: `url(${img})`,
     ...transition,
     maxHeight: "100%",
     width: "100%",

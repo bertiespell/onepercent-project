@@ -1,7 +1,7 @@
 import React from "react";
 import { drizzleConnect } from 'drizzle-react'
 import { ContractData, ContractForm } from "components/drizzle-react-components";
-import web3 from 'web3';
+import Web3 from 'web3';
 
 // @material-ui/core components
 import withStyles from "@material-ui/core/styles/withStyles";
@@ -25,6 +25,7 @@ import CustomDropdown from "components/CustomDropdown/CustomDropdown.jsx";
 import Button from 'components/CustomButtons/Button.jsx';
 
 import seedData from '../../utils/seedData';
+import getRandomInt from '../../utils/maths/getRandomNumber';
 
 const styles = {
   cardCategoryWhite: {
@@ -58,29 +59,52 @@ const styles = {
 
 class Payments extends React.Component {
 
+  paymentsMade; // ["From", "To", "Amount", "Date"]
+  availableGanacheAccounts;
+
   constructor(props, context) {
     super(props);
     this.contracts = context.drizzle.contracts;
+    console.log(this.props, this.context);
+    this.findGanacheAccounts();
+  }
+
+  async findGanacheAccounts() {
+    this.availableGanacheAccounts = await new Web3(new Web3.providers.HttpProvider('http://localhost:7545')).eth.getAccounts();
+    console.log(this.availableGanacheAccounts)
   }
 
   async seedData() {
-    // TODO: Figure out how to return other account addressses through web3 or drizzle so this doesn't have to be hardcoded
-    // NOTE: Metamask seems to only return the active account when you do getAccounts(), consider getting these separately by using the following:
-    // new Web3(new Web3.providers.HttpProvider('http://localhost:7545')).eth.getAccounts((err, accounts) => { console.log(err, accounts); });
-    // Can also get the localhost port from ENV variable
-    const returney = await this.contracts.PaymentPipe.methods.payAccountWithOnePercentTax('0xedda29b72b2505382cc345c08f85ce53e0a65de7').send({from: this.props.accounts[0], value: this.context.drizzle.web3.utils.toWei("10.0", "ether"), gasPrice: 0});
-    seedData();
+    console.log(this.props, this.context, this.contracts.ExternalContractExample.address, this.props.accounts[0]);
+
+    await this.contracts.PaymentPipe.methods.callExternalContractWithOnePercentTax(this.contracts.ExternalContractExample.address, "paymentExample()").send({from: this.props.accounts[0], value: this.context.drizzle.web3.utils.toWei("10.0", "ether"), gasPrice: 10});
+  }
+
+  componentDidUpdate(e) {
+  }
+
+  async makeNewPayment() {
+    let contractIndex = getRandomInt(10);
+    while (this.props.accounts[0] === this.availableGanacheAccounts[contractIndex]) {
+      contractIndex = getRandomInt(10);
+    }
+    console.log('!!!:)', this.availableGanacheAccounts[contractIndex])
+    await this.contracts.PaymentPipe.methods.payAccountWithOnePercentTax(this.availableGanacheAccounts[contractIndex]).send({from: this.props.accounts[0], value: this.context.drizzle.web3.utils.toWei("10.0", "ether"), gasPrice: 10});
   }
 
   render() {
     const { classes } = this.props;
     return (
       <Grid container>
-        <Button
-          onClick={this.seedData.bind(this)}
-      >
-      Seed test data
-      </Button>
+      <p><strong>My Balance</strong>: <ContractData contract="PaymentPipe" method="getTotalFunds" /></p>
+
+        <GridItem xs={12} sm={12} md={12}>
+          <Button
+            onClick={this.seedData.bind(this)}
+          >
+          Seed test data
+          </Button>
+        </GridItem>
         <GridItem xs={12} sm={12} md={12}>
           <Card>
             <CardHeader color="primary">
@@ -92,7 +116,7 @@ class Payments extends React.Component {
             <CardBody>
               <Table
                 tableHeaderColor="primary"
-                tableHead={["Name", "Country", "City", "Salary"]}
+                tableHead={["From", "To", "Amount", "Date"]}
                 tableData={[
                   ["Dakota Rice", "Niger", "Oud-Turnhout", "$36,738"],
                   ["Minerva Hooper", "Curaçao", "Sinaai-Waas", "$23,789"],
@@ -118,40 +142,38 @@ class Payments extends React.Component {
             <CardBody>
               <Table
                 tableHeaderColor="primary"
-                tableHead={["ID", "Name", "Country", "City", "Salary"]}
+                tableHead={["From", "To", "Amount", "Date"]}
                 tableData={[
-                  ["1", "Dakota Rice", "$36,738", "Niger", "Oud-Turnhout"],
-                  ["2", "Minerva Hooper", "$23,789", "Curaçao", "Sinaai-Waas"],
-                  ["3", "Sage Rodriguez", "$56,142", "Netherlands", "Baileux"],
+                  ["1", "Dakota Rice", "$36,738", "Niger"],
+                  ["2", "Minerva Hooper", "$23,789", "Curaçao"],
+                  ["3", "Sage Rodriguez", "$56,142", "Netherlands"],
                   [
                     "4",
                     "Philip Chaney",
                     "$38,735",
-                    "Korea, South",
-                    "Overland Park"
+                    "Korea, South"
                   ],
                   [
                     "5",
                     "Doris Greene",
                     "$63,542",
-                    "Malawi",
-                    "Feldkirchen in Kärnten"
+                    "Malawi"
                   ],
-                  ["6", "Mason Porter", "$78,615", "Chile", "Gloucester"]
+                  ["6", "Mason Porter", "$78,615", "Chile"]
                 ]}
               />
             </CardBody>
           </Card>
         </GridItem>
         <Grid container>
-          <GridItem xs={12} sm={12} md={4}>
+          <GridItem xs={12} sm={12} md={3}>
             <CustomDropdown
               formControlProps={{
                 fullWidth: true
               }}
             />
           </GridItem>
-          <GridItem xs={12} sm={12} md={4}>
+          <GridItem xs={12} sm={12} md={3}>
             <CustomInput
               labelText="Send to Address"
               id="error"
@@ -161,7 +183,7 @@ class Payments extends React.Component {
               }}
             />
           </GridItem>
-          <GridItem xs={12} sm={12} md={4}>
+          <GridItem xs={12} sm={12} md={3}>
             <CustomInput
               labelText="Amount"
               id="material"
@@ -176,6 +198,13 @@ class Payments extends React.Component {
                 )
               }}
             />
+          </GridItem>
+          <GridItem xs={12} sm={12} md={3}>
+            <Button
+              onClick={this.makeNewPayment.bind(this)}
+            >
+            Seed test data
+            </Button>
           </GridItem>
         </Grid>
       </Grid>
