@@ -1,6 +1,8 @@
 pragma solidity ^0.4.23;
 
-contract PaymentPipe {
+import "./AccessControl.sol";
+
+contract PaymentPipe is AccessControl {
 
   address externalContractAddress;
 
@@ -36,7 +38,7 @@ contract PaymentPipe {
     externalContractAddress = externalAccount;
     /* externalAccount.call(bytes4(keccak256(methodNameSignature))); */
 
-    /*  Couldn't find a way to do this and alter the amount of ether to send*/
+    /*  I couldn't find a way to alter the amount of ether to send and delegate the call without using assembly code*/
     bytes4 sig = bytes4(keccak256(methodNameSignature));
         assembly {
             // move pointer to free memory spot
