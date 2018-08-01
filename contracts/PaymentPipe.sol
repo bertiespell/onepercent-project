@@ -68,4 +68,9 @@ contract PaymentPipe is AccessControl {
     emit GetTotalFunds('total funds', totalFunds);
     return totalFunds;
   }
+
+  function issueRefund(address accountToRefund) public onlyCLevel {
+    totalFunds -= msg.value;
+    accountToRefund.transfer(msg.value);
+  }
 }
