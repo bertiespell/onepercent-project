@@ -13,6 +13,11 @@ contract AccessControl {
     // @dev Keeps track whether the contract is paused. When that is true, most actions are blocked
     bool public paused = false;
 
+    constructor() {
+        // ---- Initialize ceoAddress ----
+        ceoAddress = msg.sender;
+    }
+
     /// @dev Access modifier for CEO-only functionality
     modifier onlyCEO() {
         require(msg.sender == ceoAddress);
