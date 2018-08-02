@@ -1,1 +1,2 @@
 export const STORE_PAYMENT = 'STORE_PAYMENT';
+export const PAYMENT_SUCCESS = 'PAYMENT_SUCCESS';

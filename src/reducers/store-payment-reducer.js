@@ -1,8 +1,9 @@
-import { STORE_PAYMENT } from '../actions/action-types.js';
-
+import { STORE_PAYMENT, PAYMENT_SUCCESS } from '../actions/action-types.js';
+ 
 const initialState = {
   paymentData: {},
-  paymentValue: 0
+  paymentValue: 0,
+  successfullTransactions: []
 };
 
 const paymentDataReducer = (state = initialState, action) => {
@@ -16,8 +17,14 @@ const paymentDataReducer = (state = initialState, action) => {
       })
       return {
         paymentData: paymentData,
-        paymentValue: paymentValue
+        paymentValue: paymentValue,
+        successfullTransactions: state.successfullTransactions
       };
+    case PAYMENT_SUCCESS:
+      const newState = Object.assign({}, state);
+      newState.successfullTransactions.push(action.data.paymentData);
+      // TODO: check whether the transaction exists in the state - if it does and the incoming data is success just update the status
+      return newState;
     default:
       return state;
   }

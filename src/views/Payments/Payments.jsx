@@ -4,7 +4,7 @@ import { ContractData } from "components/drizzle-react-components";
 import Web3 from 'web3';
 
 import storePayment from "../../actions/store-payment.js";
-
+import paymentSuccess from "../../actions/payment-successful";
 // @material-ui/core components
 import withStyles from "@material-ui/core/styles/withStyles";
 import Grid from "@material-ui/core/Grid";
@@ -62,6 +62,7 @@ class Payments extends React.Component {
   availableGanacheAccounts;
   tableData = [];
   transactionIndexToData = [];
+  trackedTransactionHashes = [];
 
   constructor(props, context) {
     super(props);
@@ -95,16 +96,17 @@ class Payments extends React.Component {
       [transactionIndex]: reduxData
     });
     this.transactionIndexToData[transactionIndex] = payment;
+
+    const state = this.drizzle.store.getState();
   }
 
   buildTableData() {
-    this.tableData = [];
     const state = this.drizzle.store.getState();
     state.transactionStack.forEach((transactionHash, index) => {
-        if (state.transactions[transactionHash].status === "success") {
-           this.tableData.push(this.transactionIndexToData[index]);
-         } else if (state.transactions[transactionHash].status === "pending") {
-           this.tableData.push(['Loading...'])
+        if (state.transactions[transactionHash].status === "success" && this.trackedTransactionHashes.indexOf(transactionHash) === -1) {
+                     this.transactionIndexToData[index] && this.props.paymentSuccess({
+            paymentData: ["Success", ...this.transactionIndexToData[index]]
+          })
          }
     });
   }
@@ -155,8 +157,8 @@ class Payments extends React.Component {
             <CardBody>
               <Table
                 tableHeaderColor="primary"
-                tableHead={["From", "To", "Amount", "Date"]}
-                tableData={this.tableData}
+                tableHead={["Status", "From", "To", "Amount", "Date"]}
+                tableData={this.props.tableData}
               />
             </CardBody>
           </Card>
@@ -244,19 +246,22 @@ Payments.contextTypes = {
 
 // May still need this even with data function to refresh component on updates for this contract.
 const mapStateToProps = state => {
+  // console.log(state)
   return {
     accounts: state.accounts,
     SimpleStorage: state.contracts.SimpleStorage,
     TutorialToken: state.contracts.TutorialToken,
     drizzleStatus: state.drizzleStatus,
     paymentData: state.data,
+    tableData: state.paymentDataReducer.successfullTransactions,
     web3: state.web3
   }
 }
 
 const mapDispatchToProps = dispatch => {
   return {
-    storePayment: (paymentData) => dispatch(storePayment(paymentData))
+    storePayment: (paymentData) => dispatch(storePayment(paymentData)),
+    paymentSuccess: (paymentData) => dispatch(paymentSuccess(paymentData))
   }
 }
 
