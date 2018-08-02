@@ -8,15 +8,6 @@ contract PaymentPipe {
 
   mapping(address => uint) public coinBalances;
 
-  event ExternalContractCall(
-    string _message
-  );
-
-  event GetTotalFunds(
-    string _message,
-    uint totalfunds
-  );
-
   uint public totalFunds;
 
   address public owner;
@@ -69,11 +60,9 @@ contract PaymentPipe {
     }
 
     coinBalances[msg.sender] += 1;
-    emit ExternalContractCall('External Contract call made with amount!');
   }
 
   function getTotalFunds() public returns (uint) {
-    emit GetTotalFunds('total funds', totalFunds);
     return totalFunds;
   }
 
