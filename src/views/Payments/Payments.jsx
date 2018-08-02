@@ -3,6 +3,8 @@ import { drizzleConnect } from 'drizzle-react'
 import { ContractData } from "components/drizzle-react-components";
 import Web3 from 'web3';
 
+import storePayment from "../../actions/store-payment.js";
+
 // @material-ui/core components
 import withStyles from "@material-ui/core/styles/withStyles";
 import Grid from "@material-ui/core/Grid";
@@ -83,15 +85,21 @@ class Payments extends React.Component {
       date
     ]
 
+    // send payment and transactionIndex to
+
     const transactionIndex = await this.contracts.PaymentPipe.methods.callExternalContractWithOnePercentTax.cacheSend(this.contracts.ExternalContractExample.address, "paymentExample()", {from: this.props.accounts[0], value: amount, gasPrice: 10});
+
+    const reduxData = payment.concat();
+    reduxData.push(amount/100);
+    this.props.storePayment({
+      [transactionIndex]: reduxData
+    });
     this.transactionIndexToData[transactionIndex] = payment;
   }
 
   buildTableData() {
     this.tableData = [];
-
     const state = this.drizzle.store.getState();
-
     state.transactionStack.forEach((transactionHash, index) => {
         if (state.transactions[transactionHash].status === "success") {
            this.tableData.push(this.transactionIndexToData[index]);
@@ -122,6 +130,13 @@ class Payments extends React.Component {
     ]
 
     const transactionIndex = await this.contracts.PaymentPipe.methods.payAccountWithOnePercentTax.cacheSend(this.availableGanacheAccounts[accountIndex], {from: this.props.accounts[0], value: amount, gasPrice: 10});
+
+    const reduxData = payment.concat();
+    reduxData.push(amount/100);
+    this.props.storePayment({
+      [transactionIndex]: reduxData
+    });
+
     this.transactionIndexToData[transactionIndex] = payment;
   }
 
@@ -129,17 +144,6 @@ class Payments extends React.Component {
     const { classes } = this.props;
     return (
       <Grid container>
-      <p><strong>My Balance</strong>:
-
-        <ContractData contract="PaymentPipe" method="totalFunds" /></p>
-
-        <GridItem xs={12} sm={12} md={12}>
-          <Button
-            onClick={this.seedData.bind(this)}
-          >
-          Seed test data
-          </Button>
-        </GridItem>
         <GridItem xs={12} sm={12} md={12}>
           <Card>
             <CardHeader color="primary">
@@ -195,7 +199,21 @@ class Payments extends React.Component {
             <Button
               onClick={this.makeNewPayment.bind(this)}
             >
-            Seed test data
+            Make Payment
+            </Button>
+          </GridItem>
+          <GridItem xs={12} sm={12} md={6}>
+            <Button
+              onClick={this.makeNewPayment.bind(this)}
+            >
+            Pay Random Account
+            </Button>
+          </GridItem>
+          <GridItem xs={12} sm={12} md={6}>
+            <Button
+              onClick={this.seedData.bind(this)}
+            >
+            Pay External Contract
             </Button>
           </GridItem>
         </Grid>
@@ -231,12 +249,15 @@ const mapStateToProps = state => {
     SimpleStorage: state.contracts.SimpleStorage,
     TutorialToken: state.contracts.TutorialToken,
     drizzleStatus: state.drizzleStatus,
+    paymentData: state.data,
     web3: state.web3
   }
 }
 
 const mapDispatchToProps = dispatch => {
-  return {}
+  return {
+    storePayment: (paymentData) => dispatch(storePayment(paymentData))
+  }
 }
 
 export default drizzleConnect(withStyles(styles)(Payments), mapStateToProps, mapDispatchToProps);

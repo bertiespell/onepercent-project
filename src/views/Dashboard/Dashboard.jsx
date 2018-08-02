@@ -36,7 +36,7 @@ class Dashboard extends React.Component {
 
   constructor(props, context) {
     super(props)
-    this.contracts = context.drizzle.contracts
+    this.contracts = context.drizzle.contracts;
   }
 
   state = {
@@ -121,7 +121,7 @@ class Dashboard extends React.Component {
                   <InfoOutline />
                 </CardIcon>
                 <p className={classes.cardCategory}>Personally Generated</p> {/* amount the user has individually generated over time to the funding circle */}
-                <h3 className={classes.cardTitle}>$52</h3>
+                <h3 className={classes.cardTitle}>{this.context.drizzle.web3.utils.fromWei(this.props.paymentValue.toString())}</h3>
               </CardHeader>
               <CardFooter stats>
                 <div className={classes.stats}>
@@ -171,6 +171,7 @@ const mapStateToProps = state => {
     SimpleStorage: state.contracts.SimpleStorage,
     TutorialToken: state.contracts.TutorialToken,
     drizzleStatus: state.drizzleStatus,
+    paymentValue: state.paymentDataReducer.paymentValue,
     web3: state.web3
   }
 }
