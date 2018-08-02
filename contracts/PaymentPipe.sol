@@ -1,6 +1,8 @@
 pragma solidity ^0.4.23;
 
-contract PaymentPipe {
+import "./AccessControl.sol";
+
+contract PaymentPipe is AccessControl {
 
   address externalContractAddress;
 

@@ -88,6 +88,7 @@ class Payments extends React.Component {
   }
 
   buildTableData() {
+    // TODO: Just update table data - don't reset it else the table data bug happens
     this.tableData = [];
 
     const state = this.drizzle.store.getState();
