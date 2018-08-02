@@ -57,10 +57,6 @@ class Dashboard extends React.Component {
   generateDashboardData() {
     const state = this.context.drizzle.store.getState();
     this.paymentsMade = state.transactionStack.length;
-    console.log(state, this.context, this.props);
-    // this.UserOPCTokens = this.context.drizzle.coinBalances(this.props.accounts[0])
-    // this.personallyGenerated = state.get
-    // this.personallyGenerate
   }
 
   async findAccounts() {
