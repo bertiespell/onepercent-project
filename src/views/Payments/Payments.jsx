@@ -3,6 +3,9 @@ import { drizzleConnect } from 'drizzle-react'
 import { ContractData } from "components/drizzle-react-components";
 import Web3 from 'web3';
 
+import storePayment from "../../actions/store-payment.js";
+import paymentSuccess from "../../actions/payment-successful";
+import updatePaymentAsSuccessfull from "../../actions/update-payment";
 // @material-ui/core components
 import withStyles from "@material-ui/core/styles/withStyles";
 import Grid from "@material-ui/core/Grid";
@@ -59,88 +62,97 @@ class Payments extends React.Component {
 
   availableGanacheAccounts;
   tableData = [];
-  transactionIndexToData = [];
 
   constructor(props, context) {
     super(props);
     this.contracts = context.drizzle.contracts;
     this.drizzle = context.drizzle;
     this.findGanacheAccounts();
-  }
-
-  async findGanacheAccounts() {
-    this.availableGanacheAccounts = await new Web3(new Web3.providers.HttpProvider('http://localhost:7545')).eth.getAccounts();
-  }
-
-  async seedData() {
-    const amount = this.context.drizzle.web3.utils.toWei(getRandomInt(10).toString(), "ether");
-    const date = new Date(Date.now()).toString();
-
-    const payment = [
-      this.props.accounts[0],
-      this.contracts.ExternalContractExample.address,
-      this.context.drizzle.web3.utils.fromWei(amount) + " Ether",
-      date
-    ]
-
-    const transactionIndex = await this.contracts.PaymentPipe.methods.callExternalContractWithOnePercentTax.cacheSend(this.contracts.ExternalContractExample.address, "paymentExample()", {from: this.props.accounts[0], value: amount, gasPrice: 10});
-    this.transactionIndexToData[transactionIndex] = payment;
-  }
-
-  buildTableData() {
-    // TODO: Just update table data - don't reset it else the table data bug happens
-    this.tableData = [];
-
-    const state = this.drizzle.store.getState();
-
-    state.transactionStack.forEach((transactionHash, index) => {
-      if (state.transactions[transactionHash].status === "success") {
-        this.tableData.push(this.transactionIndexToData[index]);
-      } else if (state.transactions[transactionHash].status === "pending") {
-        this.tableData.push(['Loading...'])
-      }
-    });
+    this.startPaymentPoll();
   }
 
   componentDidUpdate(e) {
     this.buildTableData();
   }
 
-  async makeNewPayment() {
+  componentDidCatch(error, info) {
+    console.warn('Error encountered running application', error, info)
+  }
+
+  startPaymentPoll() {
+    setInterval(() => {
+      const dataToMutate = this.props.tableData.concat();
+      const state = this.drizzle.store.getState();
+      this.drizzleTransactionCount = state.transactionStack.length;
+
+      dataToMutate
+        .filter(transaction => transaction && transaction[0] === "Pending")
+        .forEach(transaction => {
+          const correspondingTransactionInDrizzle = state.transactions[state.transactionStack[transaction[6]]];
+
+          if (correspondingTransactionInDrizzle && correspondingTransactionInDrizzle.status === "success") {
+            this.props.updatePaymentAsSuccessfull({
+              paymentData: transaction[6]
+            });
+          }
+      });
+    }, 1000)
+  }
+
+  buildTableData () {
+    this.tableData = this.props.tableData.map(transaction => {
+      // strip out unneccessary data from the table
+      const newTransactionArr = transaction.concat();
+      newTransactionArr.splice(5, 2);
+      return newTransactionArr
+    }) 
+  }
+
+  async findGanacheAccounts() {
+    this.availableGanacheAccounts = await new Web3(new Web3.providers.HttpProvider('http://localhost:7545')).eth.getAccounts();
+  }
+
+  async payContract() {
+    await this.makePayment(this.contracts.ExternalContractExample.address);
+  }
+
+  async payAccount() {
     let accountIndex = getRandomInt(10);
+    // get an account randomly, but ensure we are not paying ourselves
     while (this.props.accounts[0] === this.availableGanacheAccounts[accountIndex]) {
       accountIndex = getRandomInt(10);
     }
+    this.makePayment(this.availableGanacheAccounts[accountIndex]);
+  }
 
-    const amount = this.context.drizzle.web3.utils.toWei(getRandomInt(10).toString(), "ether");
+  async makePayment(address) {
+    const amount = this.drizzle.web3.utils.toWei(getRandomInt(10).toString(), "ether");
     const date = new Date(Date.now()).toString();
 
     const payment = [
       this.props.accounts[0],
-      this.availableGanacheAccounts[accountIndex],
-      this.context.drizzle.web3.utils.fromWei(amount) + " Ether",
+      address,
+      this.drizzle.web3.utils.fromWei(amount) + " Ether",
       date
     ]
 
-    const transactionIndex = await this.contracts.PaymentPipe.methods.payAccountWithOnePercentTax.cacheSend(this.availableGanacheAccounts[accountIndex], {from: this.props.accounts[0], value: amount, gasPrice: 10});
-    this.transactionIndexToData[transactionIndex] = payment;
+    const transactionIndex = await this.contracts.PaymentPipe.methods.callExternalContractWithOnePercentTax.cacheSend(address, "paymentExample()", {from: this.props.accounts[0], value: amount, gasPrice: 10});
+
+    const reduxData = payment.concat();
+    reduxData.push(amount/100);
+    this.props.storePayment({
+      [transactionIndex]: reduxData
+    });
+
+    this.props.paymentSuccess({
+      paymentData: ["Pending", ...reduxData, transactionIndex]
+    })
   }
 
   render() {
     const { classes } = this.props;
     return (
       <Grid container>
-      <p><strong>My Balance</strong>:
-
-        <ContractData contract="PaymentPipe" method="totalFunds" /></p>
-
-        <GridItem xs={12} sm={12} md={12}>
-          <Button
-            onClick={this.seedData.bind(this)}
-          >
-          Seed test data
-          </Button>
-        </GridItem>
         <GridItem xs={12} sm={12} md={12}>
           <Card>
             <CardHeader color="primary">
@@ -152,14 +164,14 @@ class Payments extends React.Component {
             <CardBody>
               <Table
                 tableHeaderColor="primary"
-                tableHead={["From", "To", "Amount", "Date"]}
+                tableHead={["Status", "From", "To", "Amount", "Date"]}
                 tableData={this.tableData}
               />
             </CardBody>
           </Card>
         </GridItem>
         <Grid container>
-          <GridItem xs={12} sm={12} md={3}>
+          {/* <GridItem xs={12} sm={12} md={3}>
             <CustomDropdown
               formControlProps={{
                 fullWidth: true
@@ -196,7 +208,21 @@ class Payments extends React.Component {
             <Button
               onClick={this.makeNewPayment.bind(this)}
             >
-            Seed test data
+            Make Payment
+            </Button>
+          </GridItem> */}
+          <GridItem xs={12} sm={12} md={6}>
+            <Button
+              onClick={this.payAccount.bind(this)}
+            >
+            Pay Random Account
+            </Button>
+          </GridItem>
+          <GridItem xs={12} sm={12} md={6}>
+            <Button
+              onClick={this.payContract.bind(this)}
+            >
+            Pay External Contract
             </Button>
           </GridItem>
         </Grid>
@@ -215,8 +241,6 @@ CustomInput.propTypes = {
   success: PropTypes.bool
 };
 
-
-
 Payments.propTypes = {
   classes: PropTypes.object.isRequired
 };
@@ -232,12 +256,18 @@ const mapStateToProps = state => {
     SimpleStorage: state.contracts.SimpleStorage,
     TutorialToken: state.contracts.TutorialToken,
     drizzleStatus: state.drizzleStatus,
+    paymentData: state.data,
+    tableData: state.paymentDataReducer.paymentData,
     web3: state.web3
   }
 }
 
 const mapDispatchToProps = dispatch => {
-  return {}
+  return {
+    storePayment: (paymentData) => dispatch(storePayment(paymentData)),
+    paymentSuccess: (paymentData) => dispatch(paymentSuccess(paymentData)),
+    updatePaymentAsSuccessfull: (transactionIndex) => dispatch(updatePaymentAsSuccessfull(transactionIndex))
+  }
 }
 
 export default drizzleConnect(withStyles(styles)(Payments), mapStateToProps, mapDispatchToProps);
