@@ -1,8 +1,8 @@
 pragma solidity ^0.4.23;
 
-import "./ConvertLib.sol";
+import "./AccessControl.sol";
 
-contract PaymentPipe {
+contract PaymentPipe is AccessControl {
 
   address externalContractAddress;
 
@@ -16,10 +16,6 @@ contract PaymentPipe {
     owner = msg.sender;
   }
 
-  /* function getCoinBalance() returns (uint){
-    return coinBalances[msg.sender];
-  } */
-
   function payAccountWithOnePercentTax(address externalAccount) payable {
     uint onePercent = msg.value/100;
     totalFunds += onePercent;
@@ -28,14 +24,13 @@ contract PaymentPipe {
     externalAccount.transfer(totalToSend);
   }
 
-  // this should likely be the contract address, and then a hash of the method to call...
   function callExternalContractWithOnePercentTax(address externalAccount, string methodNameSignature) payable {
     uint onePercent = msg.value/100;
     totalFunds += onePercent;
     uint totalToSend = msg.value - onePercent;
     externalContractAddress = externalAccount;
 
-    /*  Couldn't find a way to do this and alter the amount of ether to send*/
+    /*  I couldn't find a way to alter the amount of ether to send and delegate the call without using assembly code*/
     bytes4 sig = bytes4(keccak256(methodNameSignature));
     assembly {
         // move pointer to free memory spot
@@ -66,12 +61,8 @@ contract PaymentPipe {
     return totalFunds;
   }
 
-
-  function getCoinBalanceInEth() public view returns(uint){
-		return ConvertLib.convert(getCoinBalance(),2);
-	}
-
-	function getCoinBalance() public view returns(uint) {
-		return coinBalances[msg.sender];
-	}
+  function issueRefund(address accountToRefund) public onlyCLevel {
+    totalFunds -= msg.value;
+    accountToRefund.transfer(msg.value);
+  }
 }
