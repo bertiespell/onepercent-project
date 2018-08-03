@@ -62,7 +62,7 @@ class Payments extends React.Component {
 
   availableGanacheAccounts;
   transactionIndexToData = [];
-  trackedTransactionHashes = [];
+  tableData = [];
 
   constructor(props, context) {
     super(props);
@@ -96,7 +96,6 @@ class Payments extends React.Component {
     this.props.storePayment({
       [transactionIndex]: reduxData
     });
-    this.transactionIndexToData[transactionIndex] = payment;
 
     this.props.paymentSuccess({
       paymentData: ["Pending", ...reduxData, transactionIndex]
@@ -127,8 +126,18 @@ class Payments extends React.Component {
     }, 1000)
   }
 
+  componentDidUpdate(e) {
+    this.buildTableData();
+  }
 
-  componentDidUpdate(e) { }
+  buildTableData () {
+    this.tableData = this.props.tableData.map(transaction => {
+      // strip out unneccessary data from the table
+      const newTransactionArr = transaction.concat();
+      newTransactionArr.splice(5, 2);
+      return newTransactionArr
+    }) 
+  }
 
   async makeNewPayment() {
     let accountIndex = getRandomInt(10);
@@ -153,8 +162,6 @@ class Payments extends React.Component {
     this.props.storePayment({
       [transactionIndex]: reduxData
     });
-
-    this.transactionIndexToData[transactionIndex] = payment;
   }
 
   render() {
@@ -173,7 +180,7 @@ class Payments extends React.Component {
               <Table
                 tableHeaderColor="primary"
                 tableHead={["Status", "From", "To", "Amount", "Date"]}
-                tableData={this.props.tableData.splice(5, 1)}
+                tableData={this.tableData}
               />
             </CardBody>
           </Card>
