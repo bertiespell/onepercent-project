@@ -61,7 +61,6 @@ const styles = {
 class Payments extends React.Component {
 
   availableGanacheAccounts;
-  transactionIndexToData = [];
   tableData = [];
 
   constructor(props, context) {
@@ -72,34 +71,8 @@ class Payments extends React.Component {
     this.startPaymentPoll();
   }
 
-  async findGanacheAccounts() {
-    this.availableGanacheAccounts = await new Web3(new Web3.providers.HttpProvider('http://localhost:7545')).eth.getAccounts();
-  }
-
-  async seedData() {
-    const amount = this.context.drizzle.web3.utils.toWei(getRandomInt(10).toString(), "ether");
-    const date = new Date(Date.now()).toString();
-
-    const payment = [
-      this.props.accounts[0],
-      this.contracts.ExternalContractExample.address,
-      this.context.drizzle.web3.utils.fromWei(amount) + " Ether",
-      date
-    ]
-
-    // send payment and transactionIndex to
-
-    const transactionIndex = await this.contracts.PaymentPipe.methods.callExternalContractWithOnePercentTax.cacheSend(this.contracts.ExternalContractExample.address, "paymentExample()", {from: this.props.accounts[0], value: amount, gasPrice: 10});
-
-    const reduxData = payment.concat();
-    reduxData.push(amount/100);
-    this.props.storePayment({
-      [transactionIndex]: reduxData
-    });
-
-    this.props.paymentSuccess({
-      paymentData: ["Pending", ...reduxData, transactionIndex]
-    })
+  componentDidUpdate(e) {
+    this.buildTableData();
   }
 
   componentDidCatch(error, info) {
@@ -126,10 +99,6 @@ class Payments extends React.Component {
     }, 1000)
   }
 
-  componentDidUpdate(e) {
-    this.buildTableData();
-  }
-
   buildTableData () {
     this.tableData = this.props.tableData.map(transaction => {
       // strip out unneccessary data from the table
@@ -139,29 +108,45 @@ class Payments extends React.Component {
     }) 
   }
 
-  async makeNewPayment() {
+  async findGanacheAccounts() {
+    this.availableGanacheAccounts = await new Web3(new Web3.providers.HttpProvider('http://localhost:7545')).eth.getAccounts();
+  }
+
+  async payContract() {
+    await this.makePayment(this.contracts.ExternalContractExample.address);
+  }
+
+  async payAccount() {
     let accountIndex = getRandomInt(10);
+    // get an account randomly, but ensure we are not paying ourselves
     while (this.props.accounts[0] === this.availableGanacheAccounts[accountIndex]) {
       accountIndex = getRandomInt(10);
     }
+    this.makePayment(this.availableGanacheAccounts[accountIndex]);
+  }
 
-    const amount = this.context.drizzle.web3.utils.toWei(getRandomInt(10).toString(), "ether");
+  async makePayment(address) {
+    const amount = this.drizzle.web3.utils.toWei(getRandomInt(10).toString(), "ether");
     const date = new Date(Date.now()).toString();
 
     const payment = [
       this.props.accounts[0],
-      this.availableGanacheAccounts[accountIndex],
-      this.context.drizzle.web3.utils.fromWei(amount) + " Ether",
+      address,
+      this.drizzle.web3.utils.fromWei(amount) + " Ether",
       date
     ]
 
-    const transactionIndex = await this.contracts.PaymentPipe.methods.payAccountWithOnePercentTax.cacheSend(this.availableGanacheAccounts[accountIndex], {from: this.props.accounts[0], value: amount, gasPrice: 10});
+    const transactionIndex = await this.contracts.PaymentPipe.methods.callExternalContractWithOnePercentTax.cacheSend(address, "paymentExample()", {from: this.props.accounts[0], value: amount, gasPrice: 10});
 
     const reduxData = payment.concat();
     reduxData.push(amount/100);
     this.props.storePayment({
       [transactionIndex]: reduxData
     });
+
+    this.props.paymentSuccess({
+      paymentData: ["Pending", ...reduxData, transactionIndex]
+    })
   }
 
   render() {
@@ -186,7 +171,7 @@ class Payments extends React.Component {
           </Card>
         </GridItem>
         <Grid container>
-          <GridItem xs={12} sm={12} md={3}>
+          {/* <GridItem xs={12} sm={12} md={3}>
             <CustomDropdown
               formControlProps={{
                 fullWidth: true
@@ -225,17 +210,17 @@ class Payments extends React.Component {
             >
             Make Payment
             </Button>
-          </GridItem>
+          </GridItem> */}
           <GridItem xs={12} sm={12} md={6}>
             <Button
-              onClick={this.makeNewPayment.bind(this)}
+              onClick={this.payAccount.bind(this)}
             >
             Pay Random Account
             </Button>
           </GridItem>
           <GridItem xs={12} sm={12} md={6}>
             <Button
-              onClick={this.seedData.bind(this)}
+              onClick={this.payContract.bind(this)}
             >
             Pay External Contract
             </Button>
