@@ -94,17 +94,17 @@ class Payments extends React.Component {
               paymentData: transaction[6]
             });
           }
-      });
+        });
     }, 1000)
   }
 
-  buildTableData () {
+  buildTableData() {
     this.tableData = this.props.tableData.map(transaction => {
       // strip out unneccessary data from the table
       const newTransactionArr = transaction.concat();
       newTransactionArr.splice(5, 2);
       return newTransactionArr
-    }) 
+    })
   }
 
   async findGanacheAccounts() {
@@ -135,10 +135,10 @@ class Payments extends React.Component {
       date
     ]
 
-    const transactionIndex = await this.contracts.PaymentPipe.methods.callExternalContractWithOnePercentTax.cacheSend(address, "paymentExample()", {from: this.props.accounts[0], value: amount, gasPrice: 10});
+    const transactionIndex = await this.contracts.PaymentPipe.methods.callExternalContractWithOnePercentTax.cacheSend(address, "paymentExample()", { from: this.props.accounts[0], value: amount, gasPrice: 10 });
 
     const reduxData = payment.concat();
-    reduxData.push(amount/100);
+    reduxData.push(amount / 100);
     this.props.storePayment({
       [transactionIndex]: reduxData
     });
@@ -214,14 +214,14 @@ class Payments extends React.Component {
             <Button
               onClick={this.payAccount.bind(this)}
             >
-            Pay Random Account
+              Pay Random Account
             </Button>
           </GridItem>
           <GridItem xs={12} sm={12} md={6}>
             <Button
               onClick={this.payContract.bind(this)}
             >
-            Pay External Contract
+              Pay External Contract
             </Button>
           </GridItem>
         </Grid>
