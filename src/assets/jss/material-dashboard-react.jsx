@@ -71,23 +71,23 @@ const roseBoxShadow = {
 };
 
 const warningCardHeader = {
-  background: "linear-gradient(60deg, #ffa726, #fb8c00)",
+  background: "linear-gradient(60deg, #e119fc, #fb8c00);  ",
   ...warningBoxShadow
 };
 const successCardHeader = {
-  background: "linear-gradient(60deg, #66bb6a, #43a047)",
+  background: "linear-gradient(60deg, #1bc5e1, #ee5991)",
   ...successBoxShadow
 };
 const dangerCardHeader = {
-  background: "linear-gradient(60deg, #ef5350, #e53935)",
+  background: "linear-gradient(60deg, #f98523, #7b71ef)",
   ...dangerBoxShadow
 };
 const infoCardHeader = {
-  background: "linear-gradient(60deg, #26c6da, #00acc1)",
+  background: "linear-gradient(60deg, #b94cf7, #21c0e2);",
   ...infoBoxShadow
 };
 const primaryCardHeader = {
-  background: "linear-gradient(60deg, #ab47bc, #8e24aa)",
+  background: "linear-gradient(60deg, #e117fc, #1bc2e2)",
   ...primaryBoxShadow
 };
 const roseCardHeader = {

@@ -16,7 +16,6 @@ const drizzleOptions = {
     PaymentPipe
   ],
   events: {
-    SimpleStorage: ['StorageSet'],
     ExternalContractExample: ['ExternalContractPaid']
   },
   polls: {
