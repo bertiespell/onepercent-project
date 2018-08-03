@@ -5,6 +5,7 @@ import Web3 from 'web3';
 
 import storePayment from "../../actions/store-payment.js";
 import paymentSuccess from "../../actions/payment-successful";
+import updatePaymentAsSuccessfull from "../../actions/update-payment";
 // @material-ui/core components
 import withStyles from "@material-ui/core/styles/withStyles";
 import Grid from "@material-ui/core/Grid";
@@ -60,7 +61,7 @@ const styles = {
 class Payments extends React.Component {
 
   availableGanacheAccounts;
-  tableData = [];
+  // tableData = [];
   transactionIndexToData = [];
   trackedTransactionHashes = [];
 
@@ -69,6 +70,7 @@ class Payments extends React.Component {
     this.contracts = context.drizzle.contracts;
     this.drizzle = context.drizzle;
     this.findGanacheAccounts();
+    this.startPaymentPoll();
   }
 
   async findGanacheAccounts() {
@@ -158,7 +160,7 @@ class Payments extends React.Component {
               <Table
                 tableHeaderColor="primary"
                 tableHead={["Status", "From", "To", "Amount", "Date"]}
-                tableData={this.props.tableData}
+                tableData={this.props.tableData.splice(5, 1)}
               />
             </CardBody>
           </Card>
@@ -253,7 +255,7 @@ const mapStateToProps = state => {
     TutorialToken: state.contracts.TutorialToken,
     drizzleStatus: state.drizzleStatus,
     paymentData: state.data,
-    tableData: state.paymentDataReducer.successfullTransactions,
+    tableData: state.paymentDataReducer.paymentData,
     web3: state.web3
   }
 }
@@ -261,7 +263,8 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
   return {
     storePayment: (paymentData) => dispatch(storePayment(paymentData)),
-    paymentSuccess: (paymentData) => dispatch(paymentSuccess(paymentData))
+    paymentSuccess: (paymentData) => dispatch(paymentSuccess(paymentData)),
+    updatePaymentAsSuccessfull: (transactionIndex) => dispatch(updatePaymentAsSuccessfull(transactionIndex))
   }
 }
 
