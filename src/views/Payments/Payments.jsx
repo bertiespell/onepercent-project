@@ -61,7 +61,6 @@ const styles = {
 class Payments extends React.Component {
 
   availableGanacheAccounts;
-  // tableData = [];
   transactionIndexToData = [];
   trackedTransactionHashes = [];
 
@@ -99,23 +98,37 @@ class Payments extends React.Component {
     });
     this.transactionIndexToData[transactionIndex] = payment;
 
-    const state = this.drizzle.store.getState();
+    this.props.paymentSuccess({
+      paymentData: ["Pending", ...reduxData, transactionIndex]
+    })
   }
 
-  buildTableData() {
-    const state = this.drizzle.store.getState();
-    state.transactionStack.forEach((transactionHash, index) => {
-        if (state.transactions[transactionHash].status === "success" && this.trackedTransactionHashes.indexOf(transactionHash) === -1) {
-                     this.transactionIndexToData[index] && this.props.paymentSuccess({
-            paymentData: ["Success", ...this.transactionIndexToData[index]]
-          })
-         }
-    });
+  componentDidCatch(error, info) {
+    console.warn('Error encountered running application', error, info)
   }
 
-  componentDidUpdate(e) {
-    this.buildTableData();
+  startPaymentPoll() {
+    setInterval(() => {
+      const dataToMutate = this.props.tableData.concat();
+      const state = this.drizzle.store.getState();
+      this.drizzleTransactionCount = state.transactionStack.length;
+
+      dataToMutate
+        .filter(transaction => transaction && transaction[0] === "Pending")
+        .forEach(transaction => {
+          const correspondingTransactionInDrizzle = state.transactions[state.transactionStack[transaction[6]]];
+
+          if (correspondingTransactionInDrizzle && correspondingTransactionInDrizzle.status === "success") {
+            this.props.updatePaymentAsSuccessfull({
+              paymentData: transaction[6]
+            });
+          }
+      });
+    }, 1000)
   }
+
+
+  componentDidUpdate(e) { }
 
   async makeNewPayment() {
     let accountIndex = getRandomInt(10);
@@ -236,8 +249,6 @@ CustomInput.propTypes = {
   success: PropTypes.bool
 };
 
-
-
 Payments.propTypes = {
   classes: PropTypes.object.isRequired
 };
@@ -248,7 +259,6 @@ Payments.contextTypes = {
 
 // May still need this even with data function to refresh component on updates for this contract.
 const mapStateToProps = state => {
-  // console.log(state)
   return {
     accounts: state.accounts,
     SimpleStorage: state.contracts.SimpleStorage,
