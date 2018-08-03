@@ -1,6 +1,5 @@
 import React from "react";
 import { drizzleConnect } from 'drizzle-react'
-import { ContractData } from "components/drizzle-react-components";
 import Web3 from 'web3';
 
 import storePayment from "../../actions/store-payment.js";
@@ -9,6 +8,7 @@ import updatePaymentAsSuccessfull from "../../actions/update-payment";
 // @material-ui/core components
 import withStyles from "@material-ui/core/styles/withStyles";
 import Grid from "@material-ui/core/Grid";
+// import InputAdornment from "@material-ui/core/InputAdornment";
 
 import PropTypes from 'prop-types';
 // core components
@@ -18,12 +18,11 @@ import Card from "components/Card/Card.jsx";
 import CardHeader from "components/Card/CardHeader.jsx";
 import CardBody from "components/Card/CardBody.jsx";
 
-import InputAdornment from "@material-ui/core/InputAdornment";
 // @material-ui/icons
-import MonetizationOn from "@material-ui/icons/MonetizationOn";
+// import MonetizationOn from "@material-ui/icons/MonetizationOn";
 //core components
 import CustomInput from "components/CustomInput/CustomInput.jsx";
-import CustomDropdown from "components/CustomDropdown/CustomDropdown.jsx";
+// import CustomDropdown from "components/CustomDropdown/CustomDropdown.jsx";
 import Button from 'components/CustomButtons/Button.jsx';
 
 import getRandomInt from '../../utils/maths/getRandomNumber';

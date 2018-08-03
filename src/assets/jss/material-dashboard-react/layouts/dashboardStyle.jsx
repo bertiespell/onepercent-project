@@ -4,7 +4,7 @@ import {
   container
 } from "assets/jss/material-dashboard-react.jsx";
 
-import img from '../../../img/bg-01.jpg';
+// import img from '../../../img/bg-01.jpg';
 
 const appStyle = theme => ({
   wrapper: {
