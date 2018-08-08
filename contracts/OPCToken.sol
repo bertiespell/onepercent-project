@@ -7,7 +7,7 @@ import "../installed_contracts/zeppelin/contracts/token/StandardToken.sol";
 
 contract OPCToken is AccessControl, StandardToken {
 
-    bool open;
+    bool public open;
     address public owner;
 
     struct FundingApplication {
@@ -17,12 +17,15 @@ contract OPCToken is AccessControl, StandardToken {
 
     FundingApplication[] fundingApplications;
 
+    // currently a limitiation of this implementation is that an address can only apply for funding once
+    // this is to avoid storing all addresses
     mapping(address => uint) votes;
 
     uint votingIndex = 0;
 
     constructor() {
         owner = msg.sender;
+        open = false;
     }
 
     modifier openForApplications() {
@@ -59,14 +62,17 @@ contract OPCToken is AccessControl, StandardToken {
         ));
     }
 
-    function voteForApplication(FundingApplication fundingApplication) {
+    function voteForApplication(FundingApplication fundingApplication, uint tokenAmount) {
+        // remove tokens from the user
+        require(transferFrom(msg.sender, this, tokenAmount));
+        // increment the votes 
+        votes[fundingApplication.addr] += tokenAmount;
 
+        // pass on number of votes to the funding application
     }
 
-    function deliverFundsToWinner() {
+    function deliverFundsToWinner() external onlyCLevel {
         // find the application with the most votes
-
-    
 
         delete fundingApplications; // reset all funding Applications
     }

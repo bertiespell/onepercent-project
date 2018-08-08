@@ -61,8 +61,14 @@ contract PaymentPipe is AccessControl {
     return totalFunds;
   }
 
-  function issueRefund(address accountToRefund) public onlyCLevel {
-    totalFunds -= msg.value;
-    accountToRefund.transfer(msg.value);
+  function issueRefund(address accountToRefund, uint amount) public onlyCLevel {
+   // TODO: this function makes no sense 
+    totalFunds -= amount;
+    accountToRefund.transfer(amount);
+  }
+
+  function payOut(address accountToPay, uint amountToPay) public onlyCLevel {
+    totalFunds -= amountToPay;
+    accountToPay.transfer(amountToPay);
   }
 }

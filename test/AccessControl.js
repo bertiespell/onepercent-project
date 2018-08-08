@@ -1,7 +1,7 @@
 var PaymentPipe = artifacts.require('PaymentPipe');
 var ExternalContractExample = artifacts.require('ExternalContractExample');
 
-contract('PaymentPipe', function(accounts) {
+contract('Access Control', function(accounts) {
 
     const owner = accounts[0];
     const alice = accounts[1];
