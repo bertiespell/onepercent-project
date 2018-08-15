@@ -29,7 +29,7 @@ class Dashboard extends React.Component {
   paymentsMade = 0;
   UserOPCTokens;
   personallyGenerated;
-  globallyGenerated;
+  globallyGenerated = 0;
 
   constructor(props, context) {
     super(props)

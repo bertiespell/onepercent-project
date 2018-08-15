@@ -4,6 +4,8 @@ pragma experimental ABIEncoderV2;
 import "./AccessControl.sol";
 import "../installed_contracts/zeppelin/contracts/token/StandardToken.sol";
 // import '../installed_contracts/zeppelin/math/SafeMath.sol';
+// import "./SafeMath.sol";  don't need to install this as inherited contracts have it as a depedency already
+
 
 contract OPCToken is AccessControl, StandardToken {
 
@@ -15,17 +17,29 @@ contract OPCToken is AccessControl, StandardToken {
         uint amount;
     }
 
-    FundingApplication[] fundingApplications;
+    FundingApplication[] public fundingApplications;
 
     // currently a limitiation of this implementation is that an address can only apply for funding once
     // this is to avoid storing all addresses
-    mapping(address => uint) votes;
+    mapping(address => uint) public votes;
 
-    uint votingIndex = 0;
+    uint public votingIndex = 0;
 
-    constructor() {
+    using SafeMath for uint;
+
+    string public symbol;
+    string public  name;
+    uint8 public decimals;
+    
+    constructor() public {
         owner = msg.sender;
         open = false;
+        symbol = "OPC";
+        name = "One Percent Token";
+        decimals = 18;
+        totalSupply = 1000000 * 10**uint(decimals);
+        balances[owner] = totalSupply;
+        emit Transfer(address(0), owner, totalSupply);
     }
 
     modifier openForApplications() {
@@ -45,14 +59,22 @@ contract OPCToken is AccessControl, StandardToken {
         _;
     }
 
+    function deliverFundsToWinner() external onlyCLevel {
+        // find the application with the most votes
+
+        delete fundingApplications; // reset all funding Applications
+    }
+
     function openApplications() external onlyCLevel {
         open = true;
     }
 
     function closeFunding() external onlyCLevel {
         open = false;
-        votingIndex = fundingApplications.length; // we reset the votingIndex so we know where to search from during the next set of interactions
-        // this is because delete operations are most costly - and any further searches would have to search through the entire stack otherwise
+        votingIndex = fundingApplications.length; 
+        // we reset the votingIndex so we know where to search from during the next set of interactions
+        // this is because delete operations are most costly
+        // and any further searches would have to search through the entire stack otherwise
     }
 
     function submitFundingApplication(uint requestedAmount) external openForApplications onlySingleApplications {
@@ -62,18 +84,12 @@ contract OPCToken is AccessControl, StandardToken {
         ));
     }
 
-    function voteForApplication(FundingApplication fundingApplication, uint tokenAmount) {
+    function voteForApplication(FundingApplication fundingApplication, uint tokenAmount) public {
         // remove tokens from the user
         require(transferFrom(msg.sender, this, tokenAmount));
         // increment the votes 
         votes[fundingApplication.addr] += tokenAmount;
 
         // pass on number of votes to the funding application
-    }
-
-    function deliverFundsToWinner() external onlyCLevel {
-        // find the application with the most votes
-
-        delete fundingApplications; // reset all funding Applications
     }
 }

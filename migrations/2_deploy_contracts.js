@@ -1,4 +1,3 @@
-var TutorialToken = artifacts.require("TutorialToken");
 var PaymentPipe = artifacts.require("PaymentPipe");
 var ExternalContractExample = artifacts.require('ExternalContractExample');
 var ConvertLib = artifacts.require("ConvertLib");
@@ -8,7 +7,6 @@ var StandardToken = artifacts.require("StandardToken");
 
 module.exports = function(deployer) {
   deployer.deploy(OPCToken);
-  deployer.deploy(TutorialToken);
   deployer.deploy(ExternalContractExample);
   deployer.deploy(ConvertLib)
   deployer.link(ConvertLib, [PaymentPipe]);
