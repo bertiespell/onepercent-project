@@ -6,11 +6,14 @@ var AccessControl = artifacts.require("AccessControl");
 var StandardToken = artifacts.require("StandardToken");
 
 module.exports = function(deployer) {
-  deployer.deploy(OPCToken);
+  deployer.deploy(AccessControl);
+  deployer.deploy(StandardToken);
+
+  deployer.deploy(OPCToken).then(function() {
+    return deployer.deploy(PaymentPipe, OPCToken.address)
+  });
+
   deployer.deploy(ExternalContractExample);
   deployer.deploy(ConvertLib)
   deployer.link(ConvertLib, [PaymentPipe]);
-  deployer.deploy(PaymentPipe);
-  deployer.deploy(AccessControl);
-  deployer.deploy(StandardToken);
 };

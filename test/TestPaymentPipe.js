@@ -1,3 +1,4 @@
+var OPCToken = artifacts.require("OPCToken");
 var PaymentPipe = artifacts.require('PaymentPipe');
 var ExternalContractExample = artifacts.require('ExternalContractExample');
 
@@ -10,8 +11,15 @@ contract('PaymentPipe', function(accounts) {
 
     let value = web3.toWei(1, "ether");
 
+    beforeEach(async () => {
+      opcToken = await OPCToken.new();
+      paymentPipe = await PaymentPipe.new(opcToken.address);
+
+      // calling certain methods on the payment pipe means that allowed has to be set - else OPC will error out the transaction - possible design flaw?
+
+      await opcToken.approve(owner, 1000);
+  });
     it("payment pipe ether amount should be accessed via getTotalFunds method", async () => {
-      const paymentPipe = await PaymentPipe.deployed();
 
       await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, value: value, gasPrice: 0});
 
@@ -23,7 +31,6 @@ contract('PaymentPipe', function(accounts) {
     });
 
     it("should transfer money to external account", async() => {
-        const paymentPipe = await PaymentPipe.deployed();
 
         var aliceBalanceBefore = await web3.eth.getBalance(alice).toNumber();
         var bobBalanceBefore = await web3.eth.getBalance(bob).toNumber();
@@ -38,7 +45,6 @@ contract('PaymentPipe', function(accounts) {
     });
 
     it("should increase the ether in the payment pipe contract after call to pay external account", async () => {
-      const paymentPipe = await PaymentPipe.deployed();
 
       var paymentPipeValueBefore = await web3.eth.getBalance(paymentPipe.address).toNumber();
 
@@ -50,7 +56,6 @@ contract('PaymentPipe', function(accounts) {
     });
 
     it("should pay an external contract, which is itself payable", async () => {
-      const paymentPipe = await PaymentPipe.deployed();
       const externalAccount = await ExternalContractExample.deployed();
       var aliceBalanceBefore = await web3.eth.getBalance(alice).toNumber();
       var externalAccountBalanceBefore = await web3.eth.getBalance(externalAccount.address).toNumber();
@@ -62,7 +67,6 @@ contract('PaymentPipe', function(accounts) {
     });
 
     it("should increase the ether in the payment pipe contract after call to pay external contract", async () => {
-      const paymentPipe = await PaymentPipe.deployed();
       const externalAccount = await ExternalContractExample.deployed();
 
       var paymentPipeValueBefore = await web3.eth.getBalance(paymentPipe.address).toNumber();

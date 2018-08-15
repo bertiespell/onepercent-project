@@ -14,15 +14,28 @@ contract PaymentPipe is AccessControl {
 
     address public owner;
 
-    constructor() public {
+    OPCToken public opcToken;
+
+    event FallbackTriggered(
+        address indexed sender,
+        uint value
+    );
+
+    constructor(address _opcToken) public {
         owner = msg.sender;
+        opcToken = OPCToken(_opcToken);
+    }
+
+    function() public payable {
+        // this registers an event so that we can know something went wrong with a call
+        emit FallbackTriggered(msg.sender, msg.value);
     }
 
     function payAccountWithOnePercentTax(address externalAccount) public payable {
         uint onePercent = msg.value/100;
         totalFunds += onePercent;
         uint totalToSend = msg.value - onePercent;
-        coinBalances[msg.sender] += 1;
+        opcToken.transferFrom(owner, msg.sender, 1);
         externalAccount.transfer(totalToSend);
     }
 
@@ -32,7 +45,8 @@ contract PaymentPipe is AccessControl {
         uint totalToSend = msg.value - onePercent;
         externalContractAddress = externalAccount;
 
-        /*  I couldn't find a way to alter the amount of ether to send and delegate the call without using assembly code*/
+        //  I couldn't find a way to alter the amount of ether to send 
+        // and delegate the call without using assembly code
         bytes4 sig = bytes4(keccak256(methodNameSignature));
         assembly {
             // move pointer to free memory spot
@@ -56,8 +70,7 @@ contract PaymentPipe is AccessControl {
 
             mstore(0x40, add(ptr, 0x24)) // Set storage pointer to new space
         }
-        OPCToken token = OPCToken(address(owner));
-        token.transferFrom(address(owner), msg.sender, 1);
+        opcToken.transferFrom(owner, msg.sender, 5);
     }
 
     function getTotalFunds() public view returns (uint) {

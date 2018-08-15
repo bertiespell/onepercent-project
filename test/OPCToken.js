@@ -1,5 +1,6 @@
 var OPCToken = artifacts.require("OPCToken");
 var PaymentPipe = artifacts.require('PaymentPipe');
+var ExternalContractExample = artifacts.require('ExternalContractExample');
 
 contract('OPCToken', function(accounts) {
 
@@ -14,7 +15,7 @@ contract('OPCToken', function(accounts) {
 
     beforeEach(async () => {
         opcToken = await OPCToken.new();
-        paymentPipe = await PaymentPipe.new();
+        paymentPipe = await PaymentPipe.new(opcToken.address);
     });
     it("any C level address can open the contract for applications", async () => {
         assert.equal(await opcToken.open(), false);
@@ -48,29 +49,38 @@ contract('OPCToken', function(accounts) {
         assert.equal(await opcToken.open(), false);
     });
     it("address should be able to submit a funding application", async () => {
-        // const fundingApplications = await opcToken.fundingApplications();
-        // web3.eth.getStorageAt
-        // console.log(web3)
-
-        // accounts[0] is owner
-        // TODO:!
-
-        console.log('yap', web3.toDecimal(web3.eth.getStorageAt(accounts[0], 1)));
+        //TODO
     });
     it("the entire total supply should begin with the owner", async () => {
         const ownerBalance = await opcToken.balanceOf(accounts[0]);
         const bigNumber = web3.fromWei(ownerBalance.toNumber(), "ether" )
         assert.equal(bigNumber, 1000000);
     })
-    xit("should increase a users token allowance after a payment", async () => {
-        // alice coin balance should be 0
-
-        assert.equal(await opcToken.balanceOf(alice), 0);
-        console.log(await opcToken.balanceOf(alice))
+    it("should increase a users token allowance after a payment", async () => {
+        const balance = await opcToken.balanceOf(alice)
+        assert.equal(balance.toNumber(), 0);
+        await opcToken.approve(owner, 1)
         await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, gasPrice: 0});
-        // alice coin balance should be 1
-        console.log(await opcToken.balanceOf(alice))
-
-        assert.equal(await opcToken.balanceOf(alice), 1);        
+        const newBalance = await opcToken.balanceOf(alice)
+        assert.equal(newBalance.toNumber(), 1);        
     });
+    it("should increase a users token allowance after a payment made to an external contract", async () => {
+        const balance = await opcToken.balanceOf(alice)
+        assert.equal(balance.toNumber(), 0);
+        const externalAccount = await ExternalContractExample.deployed();
+        await opcToken.approve(owner, 10)
+        await paymentPipe.callExternalContractWithOnePercentTax(externalAccount.address, "paymentExample()", {from: alice, value: web3.toWei(1, "ether"), gasPrice: 0});
+        const newBalance = await opcToken.balanceOf(alice)
+        assert.equal(newBalance.toNumber(), 1);        
+    });
+    it("should be able to call methods from inherited classes", async () => {
+        const balance = await opcToken.balanceOf(alice);
+        assert.equal(balance.toNumber(), 0);
+        const ownerBalance = await opcToken.balanceOf(owner)
+        await opcToken.approve(owner, 1)
+        await opcToken.transferFrom(owner, alice, 1);
+        const newBalance = await opcToken.balanceOf(alice)
+        assert.notEqual(newBalance.toNumber(), 0);
+        assert.equal(newBalance.toNumber(), 1);
+    })
 });
