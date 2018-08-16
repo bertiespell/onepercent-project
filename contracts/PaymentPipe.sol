@@ -35,7 +35,7 @@ contract PaymentPipe is AccessControl {
         uint onePercent = msg.value/100;
         totalFunds += onePercent;
         uint totalToSend = msg.value - onePercent;
-        opcToken.transferFrom(owner, msg.sender, 1);
+        opcToken.transfer(msg.sender, 1);
         externalAccount.transfer(totalToSend);
     }
 

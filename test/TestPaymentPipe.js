@@ -15,9 +15,8 @@ contract('PaymentPipe', function(accounts) {
       opcToken = await OPCToken.new();
       paymentPipe = await PaymentPipe.new(opcToken.address);
 
-      // calling certain methods on the payment pipe means that allowed has to be set - else OPC will error out the transaction - possible design flaw?
-
-      await opcToken.approve(owner, 1000);
+      await opcToken.approve(owner, 1000)
+      await opcToken.transferFrom(owner, paymentPipe.address, 1000);
   });
     it("payment pipe ether amount should be accessed via getTotalFunds method", async () => {
 

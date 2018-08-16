@@ -18,9 +18,7 @@ contract('OPCToken', function(accounts) {
         paymentPipe = await PaymentPipe.new(opcToken.address);
 
         await opcToken.approve(owner, 1000)
-        await opcToken.transferFrom(owner, paymentPipe.address, 1000);      // opcToken.approve(this.web3.eth.accounts[0], 1000).then(() => {
-        //     opcToken.transferFrom(this.web3.eth.accounts[0], paymentPipe.address, 1000);
-        //   });
+        await opcToken.transferFrom(owner, paymentPipe.address, 1000);
     });
     it("any C level address can open the contract for applications", async () => {
         assert.equal(await opcToken.open(), false);
@@ -64,12 +62,11 @@ contract('OPCToken', function(accounts) {
     it("should increase a users token allowance after a payment", async () => {
         const balance = await opcToken.balanceOf(alice)
         assert.equal(balance.toNumber(), 0);
-        await opcToken.approve(owner, 1)
         await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, gasPrice: 0});
         const newBalance = await opcToken.balanceOf(alice)
         assert.equal(newBalance.toNumber(), 1);        
     });
-    it.only("should increase a users token allowance after a payment made to an external contract", async () => {
+    it("should increase a users token allowance after a payment made to an external contract", async () => {
         const balance = await opcToken.balanceOf(alice)
         assert.equal(balance.toNumber(), 0);
         const externalAccount = await ExternalContractExample.deployed();
