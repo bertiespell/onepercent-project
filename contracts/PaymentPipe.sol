@@ -70,7 +70,7 @@ contract PaymentPipe is AccessControl {
 
             mstore(0x40, add(ptr, 0x24)) // Set storage pointer to new space
         }
-        opcToken.transferFrom(owner, msg.sender, 5);
+        opcToken.transfer(msg.sender, 1);
     }
 
     function getTotalFunds() public view returns (uint) {

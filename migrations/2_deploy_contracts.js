@@ -6,12 +6,15 @@ var AccessControl = artifacts.require("AccessControl");
 var StandardToken = artifacts.require("StandardToken");
 
 module.exports = function(deployer) {
-  deployer.deploy(AccessControl);
-  deployer.deploy(StandardToken);
 
-  deployer.deploy(OPCToken).then(function() {
-    return deployer.deploy(PaymentPipe, OPCToken.address)
+  deployer.deploy(OPCToken).then((opcToken) => {
+    deployer.deploy(PaymentPipe, OPCToken.address).then((paymentPipe) => {
+      opcToken.approve(this.web3.eth.accounts[0], 1000).then(() => {
+        opcToken.transferFrom(this.web3.eth.accounts[0], paymentPipe.address, 1000);
+      });
+    });
   });
+
 
   deployer.deploy(ExternalContractExample);
   deployer.deploy(ConvertLib)
