@@ -2,8 +2,7 @@ var PaymentPipe = artifacts.require("PaymentPipe");
 var ExternalContractExample = artifacts.require('ExternalContractExample');
 var ConvertLib = artifacts.require("ConvertLib");
 var OPCToken = artifacts.require("OPCToken");
-var AccessControl = artifacts.require("AccessControl");
-var StandardToken = artifacts.require("StandardToken");
+var FundingApplications = artifacts.require("FundingApplications");
 
 module.exports = function(deployer) {
   deployer.deploy(OPCToken).then((opcToken) => {
@@ -16,6 +15,8 @@ module.exports = function(deployer) {
       });
     });
   });
+
+  deployer.deploy(FundingApplications);
 
   deployer.deploy(ExternalContractExample);
   deployer.deploy(ConvertLib)
