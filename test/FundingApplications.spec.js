@@ -61,9 +61,9 @@ contract('FundingApplications', function(accounts) {
 
         await fundingApplication.openApplications({from: accounts[0]});
 
-        let error;
+        let error, proposal;
         try {
-            await fundingApplication.submitApplication(
+            proposal = await fundingApplication.submitApplication(
                 "test application", 
                 "this is a test application requiring ", 
                 5,
@@ -77,7 +77,7 @@ contract('FundingApplications', function(accounts) {
         } catch (e) {
             error = e;
         }
-
+        assert.equal(proposal, undefined);
         assert.notEqual(error, undefined);
        
     });
@@ -86,10 +86,10 @@ contract('FundingApplications', function(accounts) {
         // set new application cost
         await fundingApplication.setApplicationCostInWei(8000000000000000, {from: accounts[0]});
 
-        let error;
+        let error, proposal;
         try {
             // this should be succesful as it meets new cost
-            await fundingApplication.submitApplication(
+            proposal = await fundingApplication.submitApplication(
                 "test application", 
                 "this is a test application requiring ", 
                 5,
@@ -104,11 +104,12 @@ contract('FundingApplications', function(accounts) {
             error = e;
         }
 
+        assert.notEqual(proposal, undefined);
         assert.equal(error, undefined);
 
         try {
             // this should not be succesful as it does not meet new cost
-            await fundingApplication.submitApplication(
+            proposal = await fundingApplication.submitApplication(
                 "test application", 
                 "this is a test application requiring ", 
                 5,
@@ -122,24 +123,41 @@ contract('FundingApplications', function(accounts) {
         } catch (e) {
             error = e;
         }
-
         assert.notEqual(error, undefined);
 
     });
     it("other accounts should not be able to change the application fee", async () => {
         await fundingApplication.openApplications({from: accounts[0]});
 
-        let error;
+        let error, newCost;
         try {
-            await fundingApplication.setApplicationCost(20, {from: accounts[5]})
+            newCost = await fundingApplication.setApplicationCost(20, {from: accounts[5]})
         } catch (e) {
             error = e;
         }
-
+        assert.equal(newCost, undefined);
         assert.notEqual(error, undefined);
     });
     it("an account should not be able to submit a funding proposal when the contract is not open for applications", async () => {
-       
+
+        let error, proposal;
+        try {
+            proposal = await fundingApplication.submitApplication(
+                "test application", 
+                "this is a test application requiring ", 
+                5,
+                {
+                    from: accounts[2],
+                    value: web3.toWei(0.004, "ether"), 
+                    gasPrice: 0
+    
+                }
+            );
+        } catch (e) {
+            error = e;
+        }
+        assert.equal(proposal, undefined);
+        assert.notEqual(error, undefined)
     });
     it("an account should not be able to submit more than one funding proposal", async () => {
        
