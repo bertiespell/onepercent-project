@@ -289,13 +289,14 @@ contract('FundingApplications', function(accounts) {
             }
         );
 
+        let error3, proposal3;
         try {
-            proposal = await fundingApplication.proposals(0);
+            proposal3 = await fundingApplication.proposals(0);
         } catch (e) {
-            error = e;
+            error3 = e;
         }
-        assert.equal(error, undefined);
-        assert.notEqual(proposal, undefined);
+        assert.equal(error3, undefined);
+        assert.notEqual(proposal3, undefined);
 
         await fundingApplication.submitApplication(
             "test application", 
@@ -309,14 +310,34 @@ contract('FundingApplications', function(accounts) {
             }
         );
 
+        let error4, proposal4;
         try {
-            proposal2 = await fundingApplication.proposals(0);
+            proposal4 = await fundingApplication.proposals(0);
         } catch (e) {
-            error2 = e;
+            error4 = e;
         }
-        assert.equal(error2, undefined);
+        assert.equal(error4, undefined);
+        assert.notEqual(proposal4, undefined);
+        assert.notEqual(proposal4, proposal2);
+        proposal1 = await fundingApplication.proposals(0);
+        proposal2 = await fundingApplication.proposals(1);
+        proposal3 = await fundingApplication.proposals(2);
+        proposal4 = await fundingApplication.proposals(3);
+        let error5;
+        try {
+            proposal5 = await fundingApplication.proposals(4);
+        } catch (e) {
+            error5 = e;
+        }
+        assert.notEqual(proposal1, undefined);
         assert.notEqual(proposal2, undefined);
-        assert.notEqual(proposal, proposal2);
+        assert.notEqual(proposal3, undefined);
+        assert.notEqual(proposal4, undefined);
+        assert.notEqual(error5, undefined);
+        assert.notEqual(proposal1, proposal2);
+        assert.notEqual(proposal2, proposal3);
+        assert.notEqual(proposal3, proposal4);
+        assert.notEqual(proposal4, proposal1);
     });
     it("once applications close, the last set of proposals should be open to be voted on - i.e. voting should be open", async () => {
        
