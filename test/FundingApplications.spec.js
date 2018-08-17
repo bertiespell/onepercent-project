@@ -150,7 +150,23 @@ contract('FundingApplications', function(accounts) {
         assert.equal(votingOpen, false);
     });
     it("should only allow a c level account to open applications/proposals when voting is closed (voting should close first)", async () => {
-       
+        await fundingApplication.openVoting({from: accounts[0]});
+        votingOpen = await fundingApplication.votingOpen();
+        assert.equal(votingOpen, true);
+
+        let applicationsOpen = await fundingApplication.applicationsOpen();
+        assert.equal(applicationsOpen, false);
+        
+        let error;
+        try {
+            await fundingApplication.openApplications({from: accounts[0]});
+        } catch(e) {
+            // do nothing - catch the VM exception we expect here
+            error = e;
+        }
+        assert.notEqual(error, undefined);
+        votingOpen = await fundingApplication.applicationsOpen();
+        assert.equal(votingOpen, false);
     });
     it("when voting closes - the correct last winner should be emitted", async () => {
        
