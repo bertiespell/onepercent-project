@@ -33,6 +33,9 @@ contract('FundingApplications', function(accounts) {
         }
         assert.equal(error, undefined);
         assert.notEqual(proposal, undefined);
+    });
+    it("multiple accounts should be able to submit a funding proposal when the contract is open for applications", async () => {
+        await fundingApplication.openApplications({from: accounts[0]});
 
         await fundingApplication.submitApplication(
             "test application", 
@@ -40,6 +43,27 @@ contract('FundingApplications', function(accounts) {
             5,
             {
                 from: accounts[2],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        let error, proposal;
+        try {
+            proposal = await fundingApplication.proposals(0);
+        } catch (e) {
+            error = e;
+        }
+        assert.equal(error, undefined);
+        assert.notEqual(proposal, undefined);
+
+        await fundingApplication.submitApplication(
+            "test application", 
+            "this is a test application requiring ", 
+            5,
+            {
+                from: accounts[3],
                 value: web3.toWei(0.004, "ether"), 
                 gasPrice: 0
 
@@ -159,11 +183,140 @@ contract('FundingApplications', function(accounts) {
         assert.equal(proposal, undefined);
         assert.notEqual(error, undefined)
     });
-    it("an account should not be able to submit more than one funding proposal", async () => {
-       
+    it("an account should be able to submit more than one funding proposal", async () => {
+        await fundingApplication.openApplications({from: accounts[0]});
+
+        await fundingApplication.submitApplication(
+            "test application", 
+            "this is a test application requiring ", 
+            5,
+            {
+                from: accounts[2],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        let error, proposal;
+        try {
+            proposal = await fundingApplication.proposals(0);
+        } catch (e) {
+            error = e;
+        }
+        assert.equal(error, undefined);
+        assert.notEqual(proposal, undefined);
+
+        await fundingApplication.submitApplication(
+            "test application", 
+            "this is a test application requiring ", 
+            5,
+            {
+                from: accounts[2],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        let error2, proposal2;
+        try {
+            proposal2 = await fundingApplication.proposals(0);
+        } catch (e) {
+            error2 = e;
+        }
+        assert.equal(error2, undefined);
+        assert.notEqual(proposal2, undefined);
+        assert.notEqual(proposal, proposal2);
     });
     it("multiple accounts should be able to submit multiple proposals", async () => {
-       
+        await fundingApplication.openApplications({from: accounts[0]});
+
+        await fundingApplication.submitApplication(
+            "test application", 
+            "this is a test application requiring ", 
+            5,
+            {
+                from: accounts[2],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        let error, proposal;
+        try {
+            proposal = await fundingApplication.proposals(0);
+        } catch (e) {
+            error = e;
+        }
+        assert.equal(error, undefined);
+        assert.notEqual(proposal, undefined);
+
+        await fundingApplication.submitApplication(
+            "test application", 
+            "this is a test application requiring ", 
+            5,
+            {
+                from: accounts[2],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        let error2, proposal2;
+        try {
+            proposal2 = await fundingApplication.proposals(0);
+        } catch (e) {
+            error2 = e;
+        }
+        assert.equal(error2, undefined);
+        assert.notEqual(proposal2, undefined);
+        assert.notEqual(proposal, proposal2);
+
+        await fundingApplication.openApplications({from: accounts[0]});
+
+        await fundingApplication.submitApplication(
+            "test application", 
+            "this is a test application requiring ", 
+            5,
+            {
+                from: accounts[3],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        try {
+            proposal = await fundingApplication.proposals(0);
+        } catch (e) {
+            error = e;
+        }
+        assert.equal(error, undefined);
+        assert.notEqual(proposal, undefined);
+
+        await fundingApplication.submitApplication(
+            "test application", 
+            "this is a test application requiring ", 
+            5,
+            {
+                from: accounts[3],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        try {
+            proposal2 = await fundingApplication.proposals(0);
+        } catch (e) {
+            error2 = e;
+        }
+        assert.equal(error2, undefined);
+        assert.notEqual(proposal2, undefined);
+        assert.notEqual(proposal, proposal2);
     });
     it("once applications close, the last set of proposals should be open to be voted on - i.e. voting should be open", async () => {
        
