@@ -10,6 +10,8 @@ contract FundingApplications is AccessControl {
     bool public applicationsOpen;
     bool public votingOpen;
 
+    uint public applicationCost;
+
     Proposal[] public proposals;
 
     struct Proposal {
@@ -31,6 +33,12 @@ contract FundingApplications is AccessControl {
     constructor() public {
         applicationsOpen = false;
         votingOpen = false;
+        applicationCost = 3800 szabo;
+    }
+
+    modifier applicationsAreOpen() {
+        require(applicationsOpen == true);
+        _;
     }
 
     modifier applicationsClosed() {
@@ -38,8 +46,18 @@ contract FundingApplications is AccessControl {
         _;
     }
 
+    modifier votingIsOpen() {
+        require(votingOpen == true);
+        _;
+    }
+
     modifier votingClosed() {
         require(votingOpen == false);
+        _;
+    }
+
+    modifier meetsPaymentCriteria() {
+        require(msg.value >= applicationCost);
         _;
     }
 
@@ -59,11 +77,21 @@ contract FundingApplications is AccessControl {
         votingOpen = false;       
     }
 
+    function setApplicationCost(uint newCost) external onlyCLevel {
+        applicationCost = newCost;
+    }
+
     function submitApplication(
         string _applicationName, 
         string _description, 
         uint _requestedFunds
-    ) public {
+    ) 
+    public
+    payable
+    whenNotPaused
+    applicationsAreOpen
+    meetsPaymentCriteria
+    {
         Proposal memory proposal;
         proposal.submissionAddress = msg.sender;
         proposal.applicationName = _applicationName;

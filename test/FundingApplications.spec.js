@@ -11,6 +11,54 @@ contract('FundingApplications', function(accounts) {
         fundingApplication = await FundingApplications.new();
     });
     it("an account should be able to submit a funding proposal when the contract is open for applications", async () => {
+        await fundingApplication.openApplications({from: accounts[0]});
+
+        await fundingApplication.submitApplication(
+            "test application", 
+            "this is a test application requiring ", 
+            5,
+            {
+                from: accounts[2],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        // TODO: take this out of try catch and test properly
+        try {
+            const proposals = await fundingApplication.proposals();
+        } catch (e) {
+
+        }
+    //    asset.equal(proposals.length, 1);
+
+    });
+    it.only("should not create an application if the application fee is not met", async () => {
+
+        await fundingApplication.openApplications({from: accounts[0]});
+
+        let error;
+        try {
+            await fundingApplication.submitApplication(
+                "test application", 
+                "this is a test application requiring ", 
+                5,
+                {
+                    from: accounts[2],
+                    value: web3.toWei(0.002, "ether"), 
+                    gasPrice: 0
+    
+                }
+            );
+        } catch (e) {
+            error = e;
+        }
+
+        assert.notEqual(error, undefined);
+       
+    });
+    it("c level accounts should be able to change the application fee", async () => {
        
     });
     it("an account should not be able to submit a funding proposal when the contract is not open for applications", async () => {
