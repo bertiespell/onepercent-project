@@ -1,3 +1,6 @@
+pragma solidity ^0.4.23;
+
+
 /// @title Manages special access privileges.
 contract AccessControl {
     // This facet controls access control. There are four roles defined here.
@@ -13,7 +16,7 @@ contract AccessControl {
     // @dev Keeps track whether the contract is paused. When that is true, most actions are blocked
     bool public paused = false;
 
-    constructor() {
+    constructor() public {
         // ---- Initialize ceoAddress ----
         ceoAddress = msg.sender;
     }
@@ -70,7 +73,6 @@ contract AccessControl {
     }
 
     /*** Pausable functionality adapted from OpenZeppelin ***/
-
     /// @dev Modifier to allow actions only when the contract IS NOT paused
     modifier whenNotPaused() {
         require(!paused);
