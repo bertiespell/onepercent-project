@@ -84,7 +84,7 @@ contract('FundingApplications', function(accounts) {
     it("c level accounts should be able to change the application fee", async () => {
         await fundingApplication.openApplications({from: accounts[0]});
         // set new application cost
-        await fundingApplication.setApplicationCost(6, {from: accounts[0]});
+        await fundingApplication.setApplicationCostInWei(8000000000000000, {from: accounts[0]});
 
         let error;
         try {
@@ -95,8 +95,8 @@ contract('FundingApplications', function(accounts) {
                 5,
                 {
                     from: accounts[2],
-                    value: web3.toWei(0.002, "ether"), 
-                    gasPrice: 6
+                    value: web3.toWei(1, "ether"), 
+                    gasPrice: 0
     
                 }
             );
@@ -114,8 +114,8 @@ contract('FundingApplications', function(accounts) {
                 5,
                 {
                     from: accounts[2],
-                    value: web3.toWei(0.002, "ether"), 
-                    gasPrice: 3
+                    value: web3.toWei(0.001, "ether"), 
+                    gasPrice: 0
     
                 }
             );
@@ -128,7 +128,7 @@ contract('FundingApplications', function(accounts) {
     });
     it("other accounts should not be able to change the application fee", async () => {
         await fundingApplication.openApplications({from: accounts[0]});
-        await fundingApplication.setApplicationCost
+        // await fundingApplication.setApplicationCost
     });
     it("an account should not be able to submit a funding proposal when the contract is not open for applications", async () => {
        

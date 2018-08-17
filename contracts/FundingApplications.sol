@@ -30,10 +30,14 @@ contract FundingApplications is AccessControl {
         uint requestedFunds
     );
 
+    event ApplicationCostUpdated(
+        uint newCost
+    );
+
     constructor() public {
         applicationsOpen = false;
         votingOpen = false;
-        applicationCost = 3800 szabo;
+        applicationCost = 4000000000000000 wei;
     }
 
     modifier applicationsAreOpen() {
@@ -77,8 +81,9 @@ contract FundingApplications is AccessControl {
         votingOpen = false;       
     }
 
-    function setApplicationCost(uint newCost) external onlyCLevel {
+    function setApplicationCostInWei(uint newCost) external onlyCLevel {
         applicationCost = newCost;
+        emit ApplicationCostUpdated(newCost);
     }
 
     function submitApplication(
