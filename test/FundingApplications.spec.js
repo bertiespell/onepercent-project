@@ -128,7 +128,15 @@ contract('FundingApplications', function(accounts) {
     });
     it("other accounts should not be able to change the application fee", async () => {
         await fundingApplication.openApplications({from: accounts[0]});
-        // await fundingApplication.setApplicationCost
+
+        let error;
+        try {
+            await fundingApplication.setApplicationCost(20, {from: accounts[5]})
+        } catch (e) {
+            error = e;
+        }
+
+        assert.notEqual(error, undefined);
     });
     it("an account should not be able to submit a funding proposal when the contract is not open for applications", async () => {
        
