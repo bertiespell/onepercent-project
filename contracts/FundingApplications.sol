@@ -27,23 +27,17 @@ contract FundingApplications is AccessControl {
         address fundingApplicationAddress;
         string applicationName;
         string description; 
-        uint requestedFunds;
     }
 
     event ApplicationSubmitted(
         address submissionAddress,
         address fundingApplicationAddress,
         string applicationName,
-        string description,
-        uint requestedFunds
+        string description
     );
 
     event ApplicationCostUpdated(
         uint newCost
-    );
-
-    event Info(
-        address things
     );
 
     constructor(
@@ -101,18 +95,13 @@ contract FundingApplications is AccessControl {
     function openVoting() external onlyCLevel votingClosed applicationsClosed {
         votingOpen = true;
         for (uint i = votingStartIndex; i < votingEndIndex; i++) {
-            // open each application to voting
             Application(proposals[i].fundingApplicationAddress).openApplicationToVoting();
-            emit Info(
-                proposals[i].fundingApplicationAddress
-            );
         }
     }
 
     function closeVoting() external onlyCLevel applicationsClosed votingIsOpen {
         votingOpen = false;
         Proposal memory highestNumberOfVotes;
-        Proposal memory highestNumberOfVotesAndMetTarget;
         uint proposalsArrayLength = proposals.length;
         for (uint i = lastOpenApplicationsIndex; i < proposalsArrayLength; i++) {
             Application(proposals[i].fundingApplicationAddress).closeApplicationToVoting();
@@ -134,8 +123,7 @@ contract FundingApplications is AccessControl {
 
     function submitApplication(
         string _applicationName, 
-        string _description, 
-        uint _requestedFunds
+        string _description 
     ) 
     public
     payable
@@ -147,13 +135,11 @@ contract FundingApplications is AccessControl {
         proposal.submissionAddress = msg.sender;
         proposal.applicationName = _applicationName;
         proposal.description = _description;
-        proposal.requestedFunds = _requestedFunds;
         proposal.fundingApplicationAddress = new Application(
             this,
             msg.sender,
             _applicationName,
             _description,
-            _requestedFunds,
             paymentPipeAddress,
             opcTokenAddress
         );
@@ -163,8 +149,7 @@ contract FundingApplications is AccessControl {
             msg.sender,
             proposal.fundingApplicationAddress,
             _applicationName,
-            _description,
-            _requestedFunds
+            _description
         );
     }
 }

@@ -25,7 +25,6 @@ contract('FundingApplications', function(accounts) {
         await fundingApplication.submitApplication(
             "test application", 
             "this is a test application requiring ", 
-            5,
             {
                 from: accounts[2],
                 value: web3.toWei(0.004, "ether"), 
@@ -49,7 +48,6 @@ contract('FundingApplications', function(accounts) {
         await fundingApplication.submitApplication(
             "test application", 
             "this is a test application requiring ", 
-            5,
             {
                 from: accounts[2],
                 value: web3.toWei(0.004, "ether"), 
@@ -70,7 +68,6 @@ contract('FundingApplications', function(accounts) {
         await fundingApplication.submitApplication(
             "test application", 
             "this is a test application requiring ", 
-            5,
             {
                 from: accounts[3],
                 value: web3.toWei(0.004, "ether"), 
@@ -125,7 +122,6 @@ contract('FundingApplications', function(accounts) {
             proposal = await fundingApplication.submitApplication(
                 "test application", 
                 "this is a test application requiring ", 
-                5,
                 {
                     from: accounts[2],
                     value: web3.toWei(1, "ether"), 
@@ -145,7 +141,6 @@ contract('FundingApplications', function(accounts) {
             proposal = await fundingApplication.submitApplication(
                 "test application", 
                 "this is a test application requiring ", 
-                5,
                 {
                     from: accounts[2],
                     value: web3.toWei(0.001, "ether"), 
@@ -198,7 +193,6 @@ contract('FundingApplications', function(accounts) {
         await fundingApplication.submitApplication(
             "test application", 
             "this is a test application requiring ", 
-            5,
             {
                 from: accounts[2],
                 value: web3.toWei(0.004, "ether"), 
@@ -219,7 +213,6 @@ contract('FundingApplications', function(accounts) {
         await fundingApplication.submitApplication(
             "test application", 
             "this is a test application requiring ", 
-            5,
             {
                 from: accounts[2],
                 value: web3.toWei(0.004, "ether"), 
@@ -244,7 +237,6 @@ contract('FundingApplications', function(accounts) {
         await fundingApplication.submitApplication(
             "test application", 
             "this is a test application requiring ", 
-            5,
             {
                 from: accounts[2],
                 value: web3.toWei(0.004, "ether"), 
@@ -265,7 +257,6 @@ contract('FundingApplications', function(accounts) {
         await fundingApplication.submitApplication(
             "test application", 
             "this is a test application requiring ", 
-            5,
             {
                 from: accounts[2],
                 value: web3.toWei(0.004, "ether"), 
@@ -290,7 +281,6 @@ contract('FundingApplications', function(accounts) {
         await fundingApplication.submitApplication(
             "test application", 
             "this is a test application requiring ", 
-            5,
             {
                 from: accounts[3],
                 value: web3.toWei(0.004, "ether"), 
@@ -311,7 +301,6 @@ contract('FundingApplications', function(accounts) {
         await fundingApplication.submitApplication(
             "test application", 
             "this is a test application requiring ", 
-            5,
             {
                 from: accounts[3],
                 value: web3.toWei(0.004, "ether"), 
@@ -355,7 +344,6 @@ contract('FundingApplications', function(accounts) {
         await fundingApplication.submitApplication(
             "test application", 
             "this is a test application requiring ", 
-            5,
             {
                 from: accounts[2],
                 value: web3.toWei(0.004, "ether"), 
@@ -367,7 +355,6 @@ contract('FundingApplications', function(accounts) {
         await fundingApplication.submitApplication(
             "test application2", 
             "this is a test 2222 applicationrequiring ", 
-            5,
             {
                 from: accounts[2],
                 value: web3.toWei(0.004, "ether"), 
@@ -403,7 +390,6 @@ contract('FundingApplications', function(accounts) {
         await fundingApplication.submitApplication(
             "test application", 
             "this is a test application requiring ", 
-            5,
             {
                 from: accounts[2],
                 value: web3.toWei(0.004, "ether"), 
@@ -415,7 +401,6 @@ contract('FundingApplications', function(accounts) {
         await fundingApplication.submitApplication(
             "test application2", 
             "this is a test 2222 applicationrequiring ", 
-            5,
             {
                 from: accounts[2],
                 value: web3.toWei(0.004, "ether"), 
@@ -454,7 +439,6 @@ contract('FundingApplications', function(accounts) {
         await fundingApplication.submitApplication(
             "test application3", 
             "this is a test 3333 application requiring ", 
-            5,
             {
                 from: accounts[2],
                 value: web3.toWei(0.004, "ether"), 
@@ -466,7 +450,6 @@ contract('FundingApplications', function(accounts) {
         await fundingApplication.submitApplication(
             "test application4", 
             "this is a test 4444 applicationrequiring ", 
-            5,
             {
                 from: accounts[2],
                 value: web3.toWei(0.004, "ether"), 
@@ -504,7 +487,6 @@ contract('FundingApplications', function(accounts) {
         await fundingApplication.submitApplication(
             "test application5", 
             "this is a test 5555 application requiring ", 
-            5,
             {
                 from: accounts[2],
                 value: web3.toWei(0.004, "ether"), 
@@ -516,7 +498,6 @@ contract('FundingApplications', function(accounts) {
         await fundingApplication.submitApplication(
             "test application6", 
             "this is a test 6666 applicationrequiring ", 
-            5,
             {
                 from: accounts[2],
                 value: web3.toWei(0.004, "ether"), 

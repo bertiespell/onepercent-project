@@ -13,8 +13,6 @@ contract Application is AccessControl {
 
     string public description;
 
-    uint public requestedFunds;
-
     bool public isOpenToVote;
 
     uint public voteCount;
@@ -44,7 +42,6 @@ contract Application is AccessControl {
         address _submissionAddress,
         string _applicationName,
         string _description,
-        uint _requestedFunds,
         address pipeAddress,
         address tokenAddress
     ) public {
@@ -52,7 +49,6 @@ contract Application is AccessControl {
         submissionAddress = _submissionAddress;
         applicationName = _applicationName;
         description = _description;
-        requestedFunds = _requestedFunds;
         isOpenToVote = false;
         voteCount = 0;
         paymentPipeAddress = pipeAddress;
@@ -115,4 +111,6 @@ contract Application is AccessControl {
     {
         voteCount = voteCount + numberOfTokens;
     }
+
+    // suicide function
 }

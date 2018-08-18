@@ -26,7 +26,6 @@ contract('Application', function(accounts) {
         await fundingApplication.submitApplication(
             "test application", 
             "this is a test application requiring ", 
-            5,
             {
                 from: accounts[7],
                 value: web3.toWei(0.004, "ether"), 
@@ -48,7 +47,6 @@ contract('Application', function(accounts) {
         await fundingApplication.submitApplication(
             "test application", 
             "this is a test application requiring ", 
-            5,
             {
                 from: accounts[2],
                 value: web3.toWei(0.004, "ether"), 
@@ -94,7 +92,6 @@ contract('Application', function(accounts) {
         await fundingApplication.submitApplication(
             "test application", 
             "this is a test application requiring ", 
-            5,
             {
                 from: accounts[2],
                 value: web3.toWei(0.004, "ether"), 
@@ -146,7 +143,6 @@ contract('Application', function(accounts) {
         await fundingApplication.submitApplication(
             "test application", 
             "this is a test application requiring ", 
-            5,
             {
                 from: accounts[2],
                 value: web3.toWei(0.004, "ether"), 
@@ -189,6 +185,5 @@ contract('Application', function(accounts) {
         assert.equal(aliceBalanceAfterVote.toNumber(), 1);  
         const paymentPipeBalanceAfterVote = await opcToken.balanceOf(paymentPipe.address);
         assert.equal(paymentPipeBalanceAfterVote.toNumber(), 999);
-        
     });
 });
