@@ -21,9 +21,27 @@ contract('Application', function(accounts) {
     });
 
     it("the applications submission account should be the account that the application was made from", async () => {
+        await fundingApplication.openApplications({from: accounts[0]});
 
+        await fundingApplication.submitApplication(
+            "test application", 
+            "this is a test application requiring ", 
+            5,
+            {
+                from: accounts[7],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        application = await fundingApplication.proposals(0);
+        const applicationInstance = Application.at(application[1]);
+
+        const submissionAddress = await applicationInstance.submissionAddress();
+
+        assert.equal(submissionAddress, accounts[7]);
     });
-
     it("any account should be able to spend OPC tokens voting for a proposal - when voting is open", async () => {
         await fundingApplication.openApplications({from: accounts[0]});
 
@@ -38,6 +56,9 @@ contract('Application', function(accounts) {
 
             }
         );
+
+        await fundingApplication.closeApplications({from: accounts[0]});
+        await fundingApplication.openVoting({from: accounts[0]});
 
         application = await fundingApplication.proposals(0);
         const applicationInstance = Application.at(application[1]);
@@ -82,6 +103,9 @@ contract('Application', function(accounts) {
             }
         );
 
+        await fundingApplication.closeApplications({from: accounts[0]});
+        await fundingApplication.openVoting({from: accounts[0]});
+
         application = await fundingApplication.proposals(0);
         const applicationInstance = Application.at(application[1]);
 
@@ -101,7 +125,7 @@ contract('Application', function(accounts) {
         const paymentPipeNewBalance = await opcToken.balanceOf(paymentPipe.address)
         assert.equal(paymentPipeNewBalance.toNumber(), 998);
         
-        // now Alice has funds - she should be able to cast a vote
+        // now Alice has funds - she should be able to cast multiple votes
         await opcToken.approve(applicationInstance.address, 2, {from: alice, gasPrice: 0})
         await applicationInstance.voteForApplication(2, {from: alice, gasPrice: 0})
 
@@ -117,6 +141,42 @@ contract('Application', function(accounts) {
         
     });
     it("when voting closes - users should no longer be able to submit votes", async () => {
-    
+        await fundingApplication.openApplications({from: accounts[0]});
+
+        await fundingApplication.submitApplication(
+            "test application", 
+            "this is a test application requiring ", 
+            5,
+            {
+                from: accounts[2],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        await fundingApplication.closeApplications({from: accounts[0]});
+        await fundingApplication.openVoting({from: accounts[0]});
+
+        application = await fundingApplication.proposals(0);
+        const applicationInstance = Application.at(application[1]);
+
+        const aliceBalance = await opcToken.balanceOf(alice)
+        assert.equal(aliceBalance.toNumber(), 0);
+        const paymentPipeBalance = await opcToken.balanceOf(paymentPipe.address)
+        assert.equal(paymentPipeBalance.toNumber(), 1000);
+
+        await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, gasPrice: 0});
+        const aliceNewBalance = await opcToken.balanceOf(alice)
+        assert.equal(aliceNewBalance.toNumber(), 1);  
+        const paymentPipeNewBalance = await opcToken.balanceOf(paymentPipe.address)
+        assert.equal(paymentPipeNewBalance.toNumber(), 999);
+        
+        // now Alice has funds - she should be able to cast a vote
+        await opcToken.approve(applicationInstance.address, 1, {from: alice, gasPrice: 0})
+        await applicationInstance.voteForApplication(1, {from: alice, gasPrice: 0})
+
+        const votes = await applicationInstance.voteCount();
+        assert.equal(votes, 1);
     });
 });

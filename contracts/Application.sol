@@ -72,6 +72,11 @@ contract Application is AccessControl {
         _;
     }
 
+    modifier votingIsOpen() {
+        require(isOpenToVote == true);
+        _;
+    }
+
     modifier isFundingApplicationsContract() {
         require(msg.sender == fundingApplicationAddress);
         _;
@@ -105,7 +110,8 @@ contract Application is AccessControl {
         uint numberOfTokens
     ) 
     external 
-    transferTokensToPaymentPipe(numberOfTokens) 
+    transferTokensToPaymentPipe(numberOfTokens)
+    votingIsOpen
     {
         voteCount = voteCount + numberOfTokens;
     }
