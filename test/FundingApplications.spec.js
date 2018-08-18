@@ -720,8 +720,69 @@ contract('FundingApplications', function(accounts) {
         votingOpen = await fundingApplication.applicationsOpen();
         assert.equal(votingOpen, false);
     });
-    it("when voting closes - the correct last winner should be emitted", async () => {
-       
+    it.only("when voting closes - the correct last winner should be emitted", async () => {
+        await fundingApplication.openApplications({from: accounts[0]});
+
+        await fundingApplication.submitApplication(
+            "test application1", 
+            "this is a test 1111 application requiring ", 
+            {
+                from: accounts[5],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        await fundingApplication.submitApplication(
+            "test application2", 
+            "this is a test 2222 application requiring ", 
+            {
+                from: accounts[6],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        await fundingApplication.closeApplications({from: accounts[0]});
+        await fundingApplication.openVoting({from: accounts[0]});
+
+        application1 = await fundingApplication.proposals(0);
+        const application1Instance = Application.at(application1[1]);
+        application2 = await fundingApplication.proposals(0);
+        const application2Instance = Application.at(application2[1]);
+
+        await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, value: web3.toWei(1, "ether"), gasPrice: 0});
+
+        await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, value: web3.toWei(1, "ether"), gasPrice: 0});
+
+        await paymentPipe.payAccountWithOnePercentTax(bob, {from: accounts[3], value: web3.toWei(1, "ether"), gasPrice: 0});
+
+        const onePercentTotal = (web3.toWei(1, "ether") * 3)/100;
+
+        const winningApplicationBalanceBefore = await web3.eth.getBalance(accounts[5]).toNumber();
+        const paymentPipeBalanceBefore = await web3.eth.getBalance(paymentPipe.address).toNumber();
+
+        // now Alice has funds - she should be able to cast multiple votes
+        await opcToken.approve(application1Instance.address, 2, {from: alice, gasPrice: 0});
+        await opcToken.approve(application2Instance.address, 1, {from: accounts[3], gasPrice: 0});
+        await application1Instance.voteForApplication(2, {from: alice, gasPrice: 0});
+        await application2Instance.voteForApplication(1, {from: accounts[3], gasPrice: 0});
+
+        await fundingApplication.closeVoting({from: accounts[0]});
+
+        const winningApplicationBalanceAfter = await web3.eth.getBalance(accounts[5]).toNumber();
+        const paymentPipeBalanceAfter = await web3.eth.getBalance(paymentPipe.address).toNumber();
+
+        assert.equal(paymentPipeBalanceAfter, 0);
+        assert.equal(winningApplicationBalanceAfter, winningApplicationBalanceBefore + onePercentTotal);
+    });
+    it("should pay out multiple accounts if they are tied for votes", async () => {
+
+    });
+    it("should pay not pay out if there are no winner", async () => {
+
     });
     it("when voting closes - the winner should be reimbursed with the ether funds from the paymentPipe", async () => {
        

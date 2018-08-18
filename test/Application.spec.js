@@ -135,7 +135,6 @@ contract('Application', function(accounts) {
         assert.equal(aliceBalanceAfterVote.toNumber(), 0);  
         const paymentPipeBalanceAfterVote = await opcToken.balanceOf(paymentPipe.address)
         assert.equal(paymentPipeBalanceAfterVote.toNumber(), 1000);
-        
     });
     it("when voting closes - users should no longer be able to submit votes", async () => {
         await fundingApplication.openApplications({from: accounts[0]});

@@ -65,6 +65,9 @@ contract('PaymentPipe', function(accounts) {
       assert.equal(externalAccountBalanceAfter, externalAccountBalanceBefore + (value - (value/100)), `The balance of the external account should increase by ${value}`);
     });
 
+    it("should not give out OPC tokens when no ether is sent", async () => {
+
+    });
     it("should increase the ether in the payment pipe contract after call to pay external contract", async () => {
       const externalAccount = await ExternalContractExample.deployed();
 
