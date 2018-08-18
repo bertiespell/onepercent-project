@@ -172,11 +172,23 @@ contract('Application', function(accounts) {
         const paymentPipeNewBalance = await opcToken.balanceOf(paymentPipe.address)
         assert.equal(paymentPipeNewBalance.toNumber(), 999);
         
-        // now Alice has funds - she should be able to cast a vote
-        await opcToken.approve(applicationInstance.address, 1, {from: alice, gasPrice: 0})
-        await applicationInstance.voteForApplication(1, {from: alice, gasPrice: 0})
+        await fundingApplication.closeVoting({from: accounts[0]});
+
+        let error;
+        try {
+            await opcToken.approve(applicationInstance.address, 1, {from: alice, gasPrice: 0})
+            await applicationInstance.voteForApplication(1, {from: alice, gasPrice: 0})
+        } catch (e) {
+            error = e;
+        }
 
         const votes = await applicationInstance.voteCount();
-        assert.equal(votes, 1);
+        assert.equal(votes.toNumber(), 0);
+        assert.notEqual(error, undefined);
+        const aliceBalanceAfterVote = await opcToken.balanceOf(alice)
+        assert.equal(aliceBalanceAfterVote.toNumber(), 1);  
+        const paymentPipeBalanceAfterVote = await opcToken.balanceOf(paymentPipe.address);
+        assert.equal(paymentPipeBalanceAfterVote.toNumber(), 999);
+        
     });
 });
