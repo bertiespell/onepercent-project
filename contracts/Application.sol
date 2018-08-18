@@ -107,6 +107,6 @@ contract Application is AccessControl {
     external 
     transferTokensToPaymentPipe(numberOfTokens) 
     {
-        voteCount++;
+        voteCount = voteCount + numberOfTokens;
     }
 }
