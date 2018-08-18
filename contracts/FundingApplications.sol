@@ -15,6 +15,9 @@ contract FundingApplications is AccessControl {
     uint public lastOpenApplicationsIndex;
     uint public numberOfApplications;
 
+    uint public votingStartIndex;
+    uint public votingEndIndex;
+
     Proposal[] public proposals;
 
     struct Proposal {
@@ -37,12 +40,18 @@ contract FundingApplications is AccessControl {
         uint newCost
     );
 
+    event Info(
+        address things
+    );
+
     constructor() public {
         applicationsOpen = false;
         votingOpen = false;
         applicationCost = 4000000000000000 wei;
         lastOpenApplicationsIndex = 0;
         numberOfApplications = 0;
+        votingStartIndex = 0;
+        votingEndIndex = 0;
     }
 
     modifier applicationsAreOpen() {
@@ -70,24 +79,29 @@ contract FundingApplications is AccessControl {
         _;
     }
 
-    function openApplications() external onlyCLevel votingClosed {
+    function openApplications() external onlyCLevel votingClosed applicationsClosed {
         applicationsOpen = true;
+        // this tracks the index to begin to interate over when opening contracts to votes
+        votingStartIndex = proposals.length;
     }
 
-    function closeApplications() external onlyCLevel {
+    function closeApplications() external onlyCLevel applicationsAreOpen {
         applicationsOpen = false;
+        // this tracks the index to stop at when counting votes
+        // TODO: should consider overflow and underflow here?!
+        votingEndIndex = proposals.length;
     }
 
     function openVoting() external onlyCLevel applicationsClosed {
         votingOpen = true;
         uint proposalsArrayLength = proposals.length;
-        for (uint i = lastOpenApplicationsIndex; i < proposalsArrayLength; i++) {
+        for (uint i = votingStartIndex; i < votingEndIndex; i++) {
             // open each application to voting
             Application(proposals[i].fundingApplicationAddress).openApplicationToVoting();
+            emit Info(
+                proposals[i].fundingApplicationAddress
+            );
         }
-        // reset the index for the next round of applications
-        // TODO: should consider overflow and underflow here?!
-        lastOpenApplicationsIndex = numberOfApplications;
     }
 
     function closeVoting() external onlyCLevel {
@@ -96,6 +110,7 @@ contract FundingApplications is AccessControl {
         Proposal memory highestNumberOfVotesAndMetTarget;
         uint proposalsArrayLength = proposals.length;
         for (uint i = lastOpenApplicationsIndex; i < proposalsArrayLength; i++) {
+            Application(proposals[i].fundingApplicationAddress).closeApplicationToVoting();
             // funds should be allocated primarily to an application which has met targer *AND* has the highest number of votes
             // if none have met target, funds are allocated to the application with the highest number of votes
 

@@ -340,7 +340,7 @@ contract('FundingApplications', function(accounts) {
         assert.notEqual(proposal3, proposal4);
         assert.notEqual(proposal4, proposal1);
     });
-    it.only("once applications close, the last set of proposals should be open to be voted on - i.e. voting should be open", async () => {
+    it("once applications close, the last set of proposals should be open to be voted on - i.e. voting should be open", async () => {
         await fundingApplication.openApplications({from: accounts[0]});
 
         await fundingApplication.submitApplication(
@@ -388,7 +388,160 @@ contract('FundingApplications', function(accounts) {
         assert.equal(firstIsOpenAfter, true);
         assert.equal(secondIsOpenAfter, true);
     });
-    it("multiple rounds of opening (and then closing) applications should reveal fresh applications to vote on", async () => {
+    it.only("multiple rounds of opening (and then closing) applications should reveal fresh applications to vote on", async () => {
+        await fundingApplication.openApplications({from: accounts[0]});
+
+        await fundingApplication.submitApplication(
+            "test application", 
+            "this is a test application requiring ", 
+            5,
+            {
+                from: accounts[2],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        await fundingApplication.submitApplication(
+            "test application2", 
+            "this is a test 2222 applicationrequiring ", 
+            5,
+            {
+                from: accounts[2],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        application1 = await fundingApplication.proposals(0);
+        application2 = await fundingApplication.proposals(1);
+
+        const application1Instance = Application.at(application1[1]);
+        const application2Instance = Application.at(application2[1]);
+
+        const firstIsOpenBefore = await application1Instance.isOpenToVote();
+        const secondIsOpenBefore = await application2Instance.isOpenToVote();
+
+        assert.equal(firstIsOpenBefore, false);
+        assert.equal(secondIsOpenBefore, false);
+
+        await fundingApplication.closeApplications({from: accounts[0]});
+        await fundingApplication.openVoting({from: accounts[0]});
+        // now these two applications should be open to voting
+        const firstIsOpenAfter = await application1Instance.isOpenToVote();
+        const secondIsOpenAfter = await application2Instance.isOpenToVote();
+
+        assert.equal(firstIsOpenAfter, true);
+        assert.equal(secondIsOpenAfter, true);
+
+        await fundingApplication.closeVoting({from: accounts[0]});
+
+        /**  SECOND ROUND OF VOTES **/
+
+        await fundingApplication.openApplications({from: accounts[0]});
+
+        await fundingApplication.submitApplication(
+            "test application3", 
+            "this is a test 3333 application requiring ", 
+            5,
+            {
+                from: accounts[2],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        await fundingApplication.submitApplication(
+            "test application4", 
+            "this is a test 4444 applicationrequiring ", 
+            5,
+            {
+                from: accounts[2],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        await fundingApplication.closeApplications({from: accounts[0]});
+        await fundingApplication.openVoting({from: accounts[0]});
+
+        application3 = await fundingApplication.proposals(2);
+        application4 = await fundingApplication.proposals(3);
+
+        const application3Instance = Application.at(application3[1]);
+        const application4Instance = Application.at(application4[1]);
+
+        const firstIsOpenLater = await application1Instance.isOpenToVote();
+        const secondIsOpenLater = await application2Instance.isOpenToVote();
+
+        assert.equal(firstIsOpenLater, false);
+        assert.equal(secondIsOpenLater, false);
+
+        const thirdIsOpenBefore = await application3Instance.isOpenToVote();
+        const fourthIsOpenBefore = await application4Instance.isOpenToVote();
+
+        assert.equal(thirdIsOpenBefore, true);
+        assert.equal(fourthIsOpenBefore, true);
+
+        /**  THIRD ROUND OF VOTES **/
+
+        await fundingApplication.closeVoting({from: accounts[0]});
+        await fundingApplication.openApplications({from: accounts[0]});
+
+        await fundingApplication.submitApplication(
+            "test application5", 
+            "this is a test 5555 application requiring ", 
+            5,
+            {
+                from: accounts[2],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        await fundingApplication.submitApplication(
+            "test application6", 
+            "this is a test 6666 applicationrequiring ", 
+            5,
+            {
+                from: accounts[2],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        await fundingApplication.closeApplications({from: accounts[0]});
+        await fundingApplication.openVoting({from: accounts[0]});
+
+        application5 = await fundingApplication.proposals(4);
+        application6 = await fundingApplication.proposals(5);
+
+        const application5Instance = Application.at(application5[1]);
+        const application6Instance = Application.at(application6[1]);
+
+        const firstIsOpenEvenLater = await application1Instance.isOpenToVote();
+        const secondIsOpenEvenLater = await application2Instance.isOpenToVote();
+        const thirdIsOpenEvenLater = await application3Instance.isOpenToVote();
+        const fourthIsOpenEvenLater = await application4Instance.isOpenToVote();
+
+        assert.equal(firstIsOpenEvenLater, false);
+        assert.equal(secondIsOpenEvenLater, false);
+        assert.equal(thirdIsOpenEvenLater, false);
+        assert.equal(fourthIsOpenEvenLater, false);
+
+        const fifthIsOpenBefore = await application5Instance.isOpenToVote();
+        const sixthIsOpenBefore = await application6Instance.isOpenToVote();
+
+        assert.equal(fifthIsOpenBefore, true);
+        assert.equal(sixthIsOpenBefore, true);
+    });
+    it("application cycles and voting cycles do not need to be in line - but should still be tallied correctly", async () => {
        
     });
     it("any account should be able to spend OPC tokens voting for a proposal - when voting is open", async () => {
@@ -495,7 +648,7 @@ contract('FundingApplications', function(accounts) {
         votingOpen = await fundingApplication.votingOpen();
         assert.equal(votingOpen, true);
     });
-    it("should only allow a c level account to open voting if applications are closed (applications should close first)", async () => {
+    it("should only allow a c level account to open voting if votins is already ", async () => {
 
         await fundingApplication.openApplications({from: accounts[0]});
         applicationsOpen = await fundingApplication.applicationsOpen();
@@ -515,7 +668,7 @@ contract('FundingApplications', function(accounts) {
         votingOpen = await fundingApplication.votingOpen();
         assert.equal(votingOpen, false);
     });
-    it("should only allow a c level account to open applications/proposals when voting is closed (voting should close first)", async () => {
+    it("should only allow a c level account to open applications if applications are already closed", async () => {
         await fundingApplication.openVoting({from: accounts[0]});
         votingOpen = await fundingApplication.votingOpen();
         assert.equal(votingOpen, true);
