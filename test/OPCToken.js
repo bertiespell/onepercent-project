@@ -51,9 +51,6 @@ contract('OPCToken', function(accounts) {
         }
         assert.equal(await opcToken.open(), false);
     });
-    it("address should be able to submit a funding application", async () => {
-        //TODO
-    });
     it("the entire total supply should begin with the owner", async () => {
         const ownerBalance = await opcToken.balanceOf(accounts[0]);
         const bigNumber = web3.fromWei(ownerBalance.toNumber(), "ether" )
