@@ -79,20 +79,20 @@ contract FundingApplications is AccessControl {
         _;
     }
 
-    function openApplications() external onlyCLevel votingClosed applicationsClosed {
+    function openApplications() external onlyCLevel applicationsClosed votingClosed {
         applicationsOpen = true;
         // this tracks the index to begin to interate over when opening contracts to votes
         votingStartIndex = proposals.length;
     }
 
-    function closeApplications() external onlyCLevel applicationsAreOpen {
+    function closeApplications() external onlyCLevel applicationsAreOpen votingClosed {
         applicationsOpen = false;
         // this tracks the index to stop at when counting votes
         // TODO: should consider overflow and underflow here?!
         votingEndIndex = proposals.length;
     }
 
-    function openVoting() external onlyCLevel applicationsClosed {
+    function openVoting() external onlyCLevel votingClosed applicationsClosed {
         votingOpen = true;
         uint proposalsArrayLength = proposals.length;
         for (uint i = votingStartIndex; i < votingEndIndex; i++) {
@@ -104,7 +104,7 @@ contract FundingApplications is AccessControl {
         }
     }
 
-    function closeVoting() external onlyCLevel {
+    function closeVoting() external onlyCLevel applicationsClosed votingIsOpen {
         votingOpen = false;
         Proposal memory highestNumberOfVotes;
         Proposal memory highestNumberOfVotesAndMetTarget;

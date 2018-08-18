@@ -73,7 +73,7 @@ contract('FundingApplications', function(accounts) {
 
         let error2, proposal2;
         try {
-            proposal2 = await fundingApplication.proposals(0);
+            proposal2 = await fundingApplication.proposals(1);
         } catch (e) {
             error2 = e;
         }
@@ -276,6 +276,7 @@ contract('FundingApplications', function(accounts) {
         assert.notEqual(proposal2, undefined);
         assert.notEqual(proposal, proposal2);
 
+        await fundingApplication.closeApplications({from: accounts[0]});
         await fundingApplication.openApplications({from: accounts[0]});
 
         await fundingApplication.submitApplication(
@@ -388,7 +389,7 @@ contract('FundingApplications', function(accounts) {
         assert.equal(firstIsOpenAfter, true);
         assert.equal(secondIsOpenAfter, true);
     });
-    it.only("multiple rounds of opening (and then closing) applications should reveal fresh applications to vote on", async () => {
+    it("multiple rounds of opening (and then closing) applications should reveal fresh applications to vote on", async () => {
         await fundingApplication.openApplications({from: accounts[0]});
 
         await fundingApplication.submitApplication(
@@ -648,7 +649,59 @@ contract('FundingApplications', function(accounts) {
         votingOpen = await fundingApplication.votingOpen();
         assert.equal(votingOpen, true);
     });
-    it("should only allow a c level account to open voting if votins is already ", async () => {
+    it('should only allow a c level account to open applications when it is closed', async () => {
+        await fundingApplication.openApplications({from: accounts[0]});
+        applicationsOpen = await fundingApplication.applicationsOpen();
+        assert.equal(applicationsOpen, true);
+
+        let error;
+        try {
+            await fundingApplication.openApplications({from: accounts[0]});
+        } catch (e) {
+            // do nothing - catch the VM exception we expect here
+            error = e;
+        }
+        assert.notEqual(error, undefined);
+    });
+    it('should only allow a c level account to close applications when it is open', async () => {        
+        let error;
+        try {
+            await fundingApplication.closeApplications({from: accounts[0]});
+        } catch (e) {
+            // do nothing - catch the VM exception we expect here
+            error = e;
+        }
+        applicationsOpen = await fundingApplication.applicationsOpen();
+        assert.equal(applicationsOpen, false);
+        assert.notEqual(error, undefined);
+    });
+    it('should only allow a c level account to open voting when it is closed', async () => {
+        await fundingApplication.openVoting({from: accounts[0]});
+        votingOpen = await fundingApplication.votingOpen();
+        assert.equal(votingOpen, true);
+
+        let error;
+        try {
+            await fundingApplication.openVoting({from: accounts[0]});
+        } catch (e) {
+            // do nothing - catch the VM exception we expect here
+            error = e;
+        }
+        assert.notEqual(error, undefined);
+    });
+    it('should only allow a c level account to close voting when it is open', async () => {        
+        let error;
+        try {
+            await fundingApplication.closeVoting({from: accounts[0]});
+        } catch (e) {
+            // do nothing - catch the VM exception we expect here
+            error = e;
+        }
+        votingOpen = await fundingApplication.votingOpen();
+        assert.equal(votingOpen, false);
+        assert.notEqual(error, undefined);
+    });
+    it("should only allow a c level account to open voting if applications are closed (applications should close first)", async () => {
 
         await fundingApplication.openApplications({from: accounts[0]});
         applicationsOpen = await fundingApplication.applicationsOpen();
@@ -668,7 +721,7 @@ contract('FundingApplications', function(accounts) {
         votingOpen = await fundingApplication.votingOpen();
         assert.equal(votingOpen, false);
     });
-    it("should only allow a c level account to open applications if applications are already closed", async () => {
+    it("should only allow a c level account to open applications/proposals when voting is closed (voting should close first)", async () => {
         await fundingApplication.openVoting({from: accounts[0]});
         votingOpen = await fundingApplication.votingOpen();
         assert.equal(votingOpen, true);
