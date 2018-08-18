@@ -13,12 +13,14 @@ contract FundingApplications is AccessControl {
     uint public applicationCost;
 
     uint public lastOpenApplicationsIndex;
-    uint public numberOfApplications;
 
     uint public votingStartIndex;
     uint public votingEndIndex;
 
     Proposal[] public proposals;
+
+    address public opcTokenAddress;
+    address public paymentPipeAddress;
 
     struct Proposal {
         address submissionAddress;
@@ -44,14 +46,18 @@ contract FundingApplications is AccessControl {
         address things
     );
 
-    constructor() public {
+    constructor(
+        address pipeAddress, 
+        address tokenAddress
+    ) public {
         applicationsOpen = false;
         votingOpen = false;
         applicationCost = 4000000000000000 wei;
         lastOpenApplicationsIndex = 0;
-        numberOfApplications = 0;
         votingStartIndex = 0;
         votingEndIndex = 0;
+        paymentPipeAddress = pipeAddress;
+        opcTokenAddress = tokenAddress;
     }
 
     modifier applicationsAreOpen() {
@@ -94,7 +100,6 @@ contract FundingApplications is AccessControl {
 
     function openVoting() external onlyCLevel votingClosed applicationsClosed {
         votingOpen = true;
-        uint proposalsArrayLength = proposals.length;
         for (uint i = votingStartIndex; i < votingEndIndex; i++) {
             // open each application to voting
             Application(proposals[i].fundingApplicationAddress).openApplicationToVoting();
@@ -148,12 +153,11 @@ contract FundingApplications is AccessControl {
             msg.sender,
             _applicationName,
             _description,
-            _requestedFunds
+            _requestedFunds,
+            paymentPipeAddress,
+            opcTokenAddress
         );
         proposals.push(proposal);
-
-        // this is used to track the indexes to loop through, lowering gas costs
-        numberOfApplications++;
 
         emit ApplicationSubmitted(
             msg.sender,

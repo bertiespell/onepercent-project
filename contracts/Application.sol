@@ -1,5 +1,6 @@
 pragma solidity ^0.4.23;
 import "./AccessControl.sol";
+import { OPCToken } from "./OPCToken.sol";
 
 
 contract Application is AccessControl {
@@ -16,6 +17,14 @@ contract Application is AccessControl {
 
     bool public isOpenToVote;
 
+    uint public voteCount;
+
+    OPCToken public opcToken;
+
+    address public opcTokenAddress;
+
+    address public paymentPipeAddress;
+
     event ApplicationOpenToVotes(
         string indexed _applicationName,
         address applicationAddress
@@ -26,12 +35,18 @@ contract Application is AccessControl {
         address applicationAddress
     );
 
+    event Info(
+        bool trans
+    );
+
     constructor(
         address _fundingApplication,
         address _submissionAddress,
         string _applicationName,
         string _description,
-        uint _requestedFunds
+        uint _requestedFunds,
+        address pipeAddress,
+        address tokenAddress
     ) public {
         fundingApplicationAddress = _fundingApplication;
         submissionAddress = _submissionAddress;
@@ -39,11 +54,35 @@ contract Application is AccessControl {
         description = _description;
         requestedFunds = _requestedFunds;
         isOpenToVote = false;
+        voteCount = 0;
+        paymentPipeAddress = pipeAddress;
+        opcTokenAddress = tokenAddress;
+    }
+
+    modifier transferTokensToPaymentPipe(uint numberOfTokens) {
+        opcToken = OPCToken(opcTokenAddress);
+        // opcToken.delegatecall(bytes4(sha3("approve(address,uint256)")), numberOfTokens);
+        // 
+        opcToken.approve(msg.sender, numberOfTokens);
+        bool transferred = opcToken.transferFrom(msg.sender, paymentPipeAddress, numberOfTokens);
+        emit Info(
+            transferred
+        );
+        require(transferred);
+        _;
     }
 
     modifier isFundingApplicationsContract() {
         require(msg.sender == fundingApplicationAddress);
         _;
+    }
+    
+    function setOPCTokenAddress(address tokenAddress) external onlyCLevel {
+        opcTokenAddress = tokenAddress;
+    }
+
+    function setPaymentPipeAddress(address pipeAddress) external onlyCLevel {
+        paymentPipeAddress = pipeAddress;
     }
 
     function openApplicationToVoting() external isFundingApplicationsContract {
@@ -60,5 +99,14 @@ contract Application is AccessControl {
             applicationName,
             this
         );
+    }
+
+    function voteForApplication(
+        uint numberOfTokens
+    ) 
+    external 
+    transferTokensToPaymentPipe(numberOfTokens) 
+    {
+        voteCount++;
     }
 }

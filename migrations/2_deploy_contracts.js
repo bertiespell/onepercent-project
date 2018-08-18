@@ -12,11 +12,11 @@ module.exports = function(deployer) {
           // TODO: I'd like to pass the total Supply here , but the number is too large and throws
           opcToken.transferFrom(this.web3.eth.accounts[0], paymentPipe.address, 1000);
         });
+
+        deployer.deploy(FundingApplications, PaymentPipe.address, OPCToken.address);
       });
     });
   });
-
-  deployer.deploy(FundingApplications);
 
   deployer.deploy(ExternalContractExample);
   deployer.deploy(ConvertLib)

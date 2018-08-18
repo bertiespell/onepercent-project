@@ -1,5 +1,7 @@
 var FundingApplications = artifacts.require("FundingApplications");
 var Application = artifacts.require("Application");
+var OPCToken = artifacts.require("OPCToken");
+var PaymentPipe = artifacts.require('PaymentPipe');
 
 contract('FundingApplications', function(accounts) {
 
@@ -9,7 +11,13 @@ contract('FundingApplications', function(accounts) {
 
     let fundingApplication;
     beforeEach(async () => {
-        fundingApplication = await FundingApplications.new();
+        opcToken = await OPCToken.new();
+        paymentPipe = await PaymentPipe.new(opcToken.address);
+  
+        await opcToken.approve(owner, 1000)
+        await opcToken.transferFrom(owner, paymentPipe.address, 1000);
+
+        fundingApplication = await FundingApplications.new(paymentPipe.address, opcToken.address);
     });
     it("an account should be able to submit a funding proposal when the contract is open for applications", async () => {
         await fundingApplication.openApplications({from: accounts[0]});
@@ -541,15 +549,6 @@ contract('FundingApplications', function(accounts) {
 
         assert.equal(fifthIsOpenBefore, true);
         assert.equal(sixthIsOpenBefore, true);
-    });
-    it("application cycles and voting cycles do not need to be in line - but should still be tallied correctly", async () => {
-       
-    });
-    it("any account should be able to spend OPC tokens voting for a proposal - when voting is open", async () => {
-       
-    });
-    it("when voting closes - users should no longer be able to submit votes", async () => {
-       
     });
     it("only c level accounts can open and close applications", async () => {
         await fundingApplication.setCEO(accounts[1], {from: owner});
