@@ -33,10 +33,6 @@ contract Application is AccessControl {
         address applicationAddress
     );
 
-    event Info(
-        bool trans
-    );
-
     constructor(
         address _fundingApplication,
         address _submissionAddress,
@@ -62,13 +58,8 @@ contract Application is AccessControl {
 
     modifier transferTokensToPaymentPipe(uint numberOfTokens) {
         opcToken = OPCToken(opcTokenAddress);
-        // opcToken.delegatecall(bytes4(sha3("approve(address,uint256)")), numberOfTokens);
-        // 
         opcToken.approve(msg.sender, numberOfTokens);
         bool transferred = opcToken.transferFrom(msg.sender, paymentPipeAddress, numberOfTokens);
-        emit Info(
-            transferred
-        );
         require(transferred);
         _;
     }

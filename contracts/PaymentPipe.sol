@@ -42,14 +42,14 @@ contract PaymentPipe is AccessControl {
     }
 
     function payWinner(address winner) external {
-        uint paymentAmount = this.balance;
+        uint paymentAmount = address(this).balance;
         winner.transfer(paymentAmount);
         emit WinnerPaid(winner, paymentAmount);
     }
 
     function payWinners() external {
         uint numberOfPlayers = playersToPay.length;
-        uint amountToPay = this.balance.div(numberOfPlayers);
+        uint amountToPay = address(this).balance.div(numberOfPlayers);
         for (uint i = 0; i < numberOfPlayers; i++) {
             // pay the winner
             playersToPay[i].transfer(amountToPay);

@@ -23,6 +23,8 @@ contract FundingApplications is AccessControl {
     address public opcTokenAddress;
     address public paymentPipeAddress;
 
+    address[] public tiedAddresses;
+    
     struct Proposal {
         address submissionAddress;
         address fundingApplicationAddress;
@@ -104,20 +106,23 @@ contract FundingApplications is AccessControl {
         votingOpen = false;
         uint highestNumberOfVotes = 0;
         address addressesToPay;
-        address[] tiedAddresses;
-        uint tiedAddressesIndex = 0;
+        uint tiedAddressesIndex = tiedAddresses.length;
         bool tiedResult = false;
         for (uint i = votingStartIndex; i < votingEndIndex; i++) {
             Application application = Application(proposals[i].fundingApplicationAddress);
             if (application.voteCount() > highestNumberOfVotes) {
                 // if it greater empty tiedAddresses
                 // keep track of the tiedAddressesIndex so we know which addresses in the array are the highest voted
+                // this may have to go after 
                 tiedAddressesIndex = tiedAddresses.length;
+                tiedAddresses.push(application.submissionAddress());
+                
                 highestNumberOfVotes = application.voteCount();
                 addressesToPay = application.submissionAddress();
                 tiedResult = false;
             } else if (application.voteCount() == highestNumberOfVotes) {
-                tiedAddresses.push(application);
+                tiedAddresses.push(application.submissionAddress());
+                // emit Info(tiedResult);
                 tiedResult = true;
             }
             application.kill();
