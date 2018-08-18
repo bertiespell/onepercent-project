@@ -12,6 +12,9 @@ contract FundingApplications is AccessControl {
 
     uint public applicationCost;
 
+    uint public lastOpenApplicationsIndex;
+    uint public numberOfApplications;
+
     Proposal[] public proposals;
 
     struct Proposal {
@@ -38,6 +41,8 @@ contract FundingApplications is AccessControl {
         applicationsOpen = false;
         votingOpen = false;
         applicationCost = 4000000000000000 wei;
+        lastOpenApplicationsIndex = 0;
+        numberOfApplications = 0;
     }
 
     modifier applicationsAreOpen() {
@@ -70,15 +75,36 @@ contract FundingApplications is AccessControl {
     }
 
     function closeApplications() external onlyCLevel {
-        applicationsOpen = false;       
+        applicationsOpen = false;
     }
 
     function openVoting() external onlyCLevel applicationsClosed {
         votingOpen = true;
+        uint proposalsArrayLength = proposals.length;
+        for (uint i = lastOpenApplicationsIndex; i < proposalsArrayLength; i++) {
+            // open each application to voting
+            Application(proposals[i].fundingApplicationAddress).openApplicationToVoting();
+        }
+        // reset the index for the next round of applications
+        // TODO: should consider overflow and underflow here?!
+        lastOpenApplicationsIndex = numberOfApplications;
     }
 
     function closeVoting() external onlyCLevel {
-        votingOpen = false;       
+        votingOpen = false;
+        Proposal memory highestNumberOfVotes;
+        Proposal memory highestNumberOfVotesAndMetTarget;
+        uint proposalsArrayLength = proposals.length;
+        for (uint i = lastOpenApplicationsIndex; i < proposalsArrayLength; i++) {
+            // funds should be allocated primarily to an application which has met targer *AND* has the highest number of votes
+            // if none have met target, funds are allocated to the application with the highest number of votes
+
+            // PSUEDO-CODE:
+
+            // close each application to voting
+            // check whether it is the highest votes
+            // check whether is has met target
+        }   
     }
 
     function setApplicationCostInWei(uint newCost) external onlyCLevel {
@@ -110,6 +136,9 @@ contract FundingApplications is AccessControl {
             _requestedFunds
         );
         proposals.push(proposal);
+
+        // this is used to track the indexes to loop through, lowering gas costs
+        numberOfApplications++;
 
         emit ApplicationSubmitted(
             msg.sender,

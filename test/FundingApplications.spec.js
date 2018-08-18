@@ -1,4 +1,5 @@
 var FundingApplications = artifacts.require("FundingApplications");
+var Application = artifacts.require("Application");
 
 contract('FundingApplications', function(accounts) {
 
@@ -339,7 +340,55 @@ contract('FundingApplications', function(accounts) {
         assert.notEqual(proposal3, proposal4);
         assert.notEqual(proposal4, proposal1);
     });
-    it("once applications close, the last set of proposals should be open to be voted on - i.e. voting should be open", async () => {
+    it.only("once applications close, the last set of proposals should be open to be voted on - i.e. voting should be open", async () => {
+        await fundingApplication.openApplications({from: accounts[0]});
+
+        await fundingApplication.submitApplication(
+            "test application", 
+            "this is a test application requiring ", 
+            5,
+            {
+                from: accounts[2],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        await fundingApplication.submitApplication(
+            "test application2", 
+            "this is a test 2222 applicationrequiring ", 
+            5,
+            {
+                from: accounts[2],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        application1 = await fundingApplication.proposals(0);
+        application2 = await fundingApplication.proposals(1);
+
+        const application1Instance = Application.at(application1[1]);
+        const application2Instance = Application.at(application2[1]);
+
+        const firstIsOpenBefore = await application1Instance.isOpenToVote();
+        const secondIsOpenBefore = await application2Instance.isOpenToVote();
+
+        assert.equal(firstIsOpenBefore, false);
+        assert.equal(secondIsOpenBefore, false);
+
+        await fundingApplication.closeApplications({from: accounts[0]});
+        await fundingApplication.openVoting({from: accounts[0]});
+        // now these two applications should be open to voting
+        const firstIsOpenAfter = await application1Instance.isOpenToVote();
+        const secondIsOpenAfter = await application2Instance.isOpenToVote();
+
+        assert.equal(firstIsOpenAfter, true);
+        assert.equal(secondIsOpenAfter, true);
+    });
+    it("multiple rounds of opening (and then closing) applications should reveal fresh applications to vote on", async () => {
        
     });
     it("any account should be able to spend OPC tokens voting for a proposal - when voting is open", async () => {

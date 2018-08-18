@@ -1,7 +1,8 @@
 pragma solidity ^0.4.23;
+import "./AccessControl.sol";
 
 
-contract Application {
+contract Application is AccessControl {
 
     address public submissionAddress;
 
@@ -12,6 +13,18 @@ contract Application {
     string public description;
 
     uint public requestedFunds;
+
+    bool public isOpenToVote;
+
+    event ApplicationOpenToVotes(
+        string indexed _applicationName,
+        address applicationAddress
+    );
+
+    event ApplicationClosedToVotes(
+        string indexed _applicationName,
+        address applicationAddress
+    );
 
     constructor(
         address _fundingApplication,
@@ -25,10 +38,27 @@ contract Application {
         applicationName = _applicationName;
         description = _description;
         requestedFunds = _requestedFunds;
+        isOpenToVote = false;
     }
 
-    // withdraw the funds - this can either be C level or the submission address!
-    // function withdrawFunds() public {
+    modifier isFundingApplicationsContract() {
+        require(msg.sender == fundingApplicationAddress);
+        _;
+    }
 
-    // }
+    function openApplicationToVoting() external isFundingApplicationsContract {
+        isOpenToVote = true;
+        emit ApplicationOpenToVotes(
+            applicationName,
+            this
+        );
+    }
+
+    function closeApplicationToVoting() external isFundingApplicationsContract {
+        isOpenToVote = false;
+        emit ApplicationClosedToVotes(
+            applicationName,
+            this
+        );
+    }
 }

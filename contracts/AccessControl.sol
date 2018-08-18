@@ -100,4 +100,12 @@ contract AccessControl {
         // can't unpause if contract was upgraded
         paused = false;
     }
+
+    function checkAddressAuth() internal view returns (bool) {
+        return (
+            msg.sender == cooAddress ||
+            msg.sender == ceoAddress ||
+            msg.sender == cfoAddress
+        );
+    }
 }
