@@ -1,4 +1,3 @@
-import TutorialToken from '../build/contracts/TutorialToken.json'
 import PaymentPipe from '../build/contracts/PaymentPipe.json';
 import ExternalContractExample from '../build/contracts/ExternalContractExample.json';
 
@@ -11,7 +10,6 @@ const drizzleOptions = {
     }
   },
   contracts: [
-    TutorialToken,
     ExternalContractExample,
     PaymentPipe
   ],

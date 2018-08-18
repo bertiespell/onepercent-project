@@ -1,5 +1,6 @@
 pragma solidity ^0.4.23;
 
+
 contract Relay {
     address public currentVersion;
     address public owner;
@@ -9,18 +10,18 @@ contract Relay {
         _;
     }
 
-    function Relay(address initAddr) {
+    constructor (address initAddr) public {
         currentVersion = initAddr;
         owner = msg.sender; // this owner may be another contract with multisig, not a single contract owner
+    }
+
+    function() {
+        require(currentVersion.delegatecall(msg.data));
     }
 
     function changeContract(address newVersion) public
     onlyOwner()
     {
         currentVersion = newVersion;
-    }
-
-    function() {
-        require(currentVersion.delegatecall(msg.data));
     }
 }
