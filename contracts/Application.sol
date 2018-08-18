@@ -55,6 +55,11 @@ contract Application is AccessControl {
         opcTokenAddress = tokenAddress;
     }
 
+    modifier isFundingApplication() {
+        require(msg.sender == fundingApplicationAddress);
+        _;
+    }
+
     modifier transferTokensToPaymentPipe(uint numberOfTokens) {
         opcToken = OPCToken(opcTokenAddress);
         // opcToken.delegatecall(bytes4(sha3("approve(address,uint256)")), numberOfTokens);
@@ -112,5 +117,7 @@ contract Application is AccessControl {
         voteCount = voteCount + numberOfTokens;
     }
 
-    // suicide function
+    function kill() isFundingApplication {
+        selfdestruct(this);
+    }
 }

@@ -2,6 +2,7 @@ pragma solidity ^0.4.23;
 import "./AccessControl.sol";
 import "./SafeMath.sol";
 import "./Application.sol";
+import "./PaymentPipe.sol";
 
 
 contract FundingApplications is AccessControl {
@@ -101,19 +102,41 @@ contract FundingApplications is AccessControl {
 
     function closeVoting() external onlyCLevel applicationsClosed votingIsOpen {
         votingOpen = false;
-        Proposal memory highestNumberOfVotes;
-        uint proposalsArrayLength = proposals.length;
-        for (uint i = lastOpenApplicationsIndex; i < proposalsArrayLength; i++) {
-            Application(proposals[i].fundingApplicationAddress).closeApplicationToVoting();
-            // funds should be allocated primarily to an application which has met targer *AND* has the highest number of votes
-            // if none have met target, funds are allocated to the application with the highest number of votes
+        uint highestNumberOfVotes = 0;
+        address addressesToPay;
+        address[] tiedAddresses;
+        uint tiedAddressesIndex = 0;
+        bool tiedResult = false;
+        for (uint i = votingStartIndex; i < votingEndIndex; i++) {
+            Application application = Application(proposals[i].fundingApplicationAddress);
+            if (application.voteCount() > highestNumberOfVotes) {
+                // if it greater empty tiedAddresses
+                // keep track of the tiedAddressesIndex so we know which addresses in the array are the highest voted
+                tiedAddressesIndex = tiedAddresses.length;
+                highestNumberOfVotes = application.voteCount();
+                addressesToPay = application.submissionAddress();
+                tiedResult = false;
+            } else if (application.voteCount() == highestNumberOfVotes) {
+                tiedAddresses.push(application);
+                tiedResult = true;
+            }
+            application.kill();
+        }
 
-            // PSUEDO-CODE:
+        // catch the case where no-one won / the applications list was empty
 
-            // close each application to voting
-            // check whether it is the highest votes
-            // check whether is has met target
-        }   
+        PaymentPipe paymentPipe = PaymentPipe(paymentPipeAddress);
+
+        if (tiedResult) {
+            for (uint j = tiedAddressesIndex; j < tiedAddresses.length; j++) {
+                // set each payee to be a winner
+                paymentPipe.setMultipleWinners(tiedAddresses[j]);
+            }
+            // let paymentPipe determine the share to pay to each winner
+            paymentPipe.payWinners();
+        } else {
+            paymentPipe.payWinner(addressesToPay);
+        }
     }
 
     function setApplicationCostInWei(uint newCost) external onlyCLevel {

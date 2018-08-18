@@ -2,9 +2,12 @@ pragma solidity ^0.4.23;
 
 import "./AccessControl.sol";
 import { OPCToken } from "./OPCToken.sol";
+import "./SafeMath.sol";
 
 
 contract PaymentPipe is AccessControl {
+
+    using SafeMath for uint;
 
     address externalContractAddress;
 
@@ -15,6 +18,13 @@ contract PaymentPipe is AccessControl {
     address public owner;
 
     OPCToken public opcToken;
+
+    address[] public playersToPay;
+
+    event WinnerPaid(
+        address winner,
+        uint amount
+    );
 
     event FallbackTriggered(
         address indexed sender,
@@ -29,6 +39,27 @@ contract PaymentPipe is AccessControl {
     function() public payable {
         // this registers an event so that we can know something went wrong with a call
         emit FallbackTriggered(msg.sender, msg.value);
+    }
+
+    function payWinner(address winner) external {
+        uint paymentAmount = this.balance;
+        winner.transfer(paymentAmount);
+        emit WinnerPaid(winner, paymentAmount);
+    }
+
+    function payWinners() external {
+        uint numberOfPlayers = playersToPay.length;
+        uint amountToPay = this.balance.div(numberOfPlayers);
+        for (uint i = 0; i < numberOfPlayers; i++) {
+            // pay the winner
+            playersToPay[i].transfer(amountToPay);
+            emit WinnerPaid(playersToPay[i], amountToPay);
+        }
+        delete playersToPay;
+    }
+
+    function setMultipleWinners(address winner) external {
+        playersToPay.push(winner);
     }
 
     function payAccountWithOnePercentTax(address externalAccount) public payable {
