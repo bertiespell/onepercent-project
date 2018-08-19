@@ -104,22 +104,22 @@ contract FundingApplications is AccessControl {
 
     function closeVoting() external onlyCLevel applicationsClosed votingIsOpen {
         votingOpen = false;
-        uint highestNumberOfVotes = 0;
+        uint highestVotes = 0;
         address addressesToPay;
         uint tiedAddressesIndex = tiedAddresses.length;
         bool tiedResult = false;
         for (uint i = votingStartIndex; i < votingEndIndex; i++) {
             Application application = Application(proposals[i].fundingApplicationAddress);
-            uint numVotes = application.voteCount();
-            if (numVotes > highestNumberOfVotes) {
+            uint votes = application.voteCount();
+            if (votes > highestVotes) {
                 // keep track of the tiedAddressesIndex so we know which addresses in the array are the highest voted
                 tiedAddressesIndex = tiedAddresses.length;
                 tiedAddresses.push(application.submissionAddress());
                 
-                highestNumberOfVotes = numVotes;
+                highestVotes = votes;
                 addressesToPay = application.submissionAddress();
                 tiedResult = false;
-            } else if ((numVotes == highestNumberOfVotes) && (numVotes > 0)) { // stops the first application with no votes from being counted
+            } else if ((votes == highestVotes) && (votes > 0)) { // stops the first application with no votes from being counted
                 tiedAddresses.push(application.submissionAddress());
                 // emit Info(tiedResult);
                 tiedResult = true;
