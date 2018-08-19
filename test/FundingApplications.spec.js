@@ -778,7 +778,7 @@ contract('FundingApplications', function(accounts) {
         assert.equal(paymentPipeBalanceAfter, 0);
         assert.equal(winningApplicationBalanceAfter, winningApplicationBalanceBefore + onePercentTotal);
     });
-    it.only("should pay out multiple accounts if they are tied for votes", async () => {
+    it("should pay out multiple accounts if they are tied for votes", async () => {
         await fundingApplication.openApplications({from: accounts[0]});
 
         await fundingApplication.submitApplication(
@@ -841,7 +841,37 @@ contract('FundingApplications', function(accounts) {
         assert.equal(secondWinningApplicationBalanceAfter, secondWinningApplicationBalanceBefore + (onePercentTotal/2))
     });
     it("should pay not pay out if there are no winner", async () => {
+        await fundingApplication.openApplications({from: accounts[0]});
+        
+        await fundingApplication.submitApplication(
+            "test application1", 
+            "this is a test 1111 application requiring ", 
+            {
+                from: accounts[5],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
 
+            }
+        );
+
+        await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, value: web3.toWei(1, "ether"), gasPrice: 0});
+        
+        const paymentPipeBalanceBefore = await web3.eth.getBalance(paymentPipe.address).toNumber();
+
+        await fundingApplication.closeApplications({from: accounts[0]});
+        await fundingApplication.openVoting({from: accounts[0]});
+
+        let error;
+        try {
+            await fundingApplication.closeVoting({from: accounts[0]});
+        } catch (e) {
+            error = e;
+        }
+
+        const paymentPipeBalanceAfter = await web3.eth.getBalance(paymentPipe.address).toNumber();
+
+        assert.equal(error, undefined);
+        assert.equal(paymentPipeBalanceBefore, paymentPipeBalanceAfter);
     });
     it("when voting closes - the winner should be reimbursed with the ether funds from the paymentPipe", async () => {
        

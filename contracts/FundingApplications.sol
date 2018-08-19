@@ -111,24 +111,20 @@ contract FundingApplications is AccessControl {
         for (uint i = votingStartIndex; i < votingEndIndex; i++) {
             Application application = Application(proposals[i].fundingApplicationAddress);
             if (application.voteCount() > highestNumberOfVotes) {
-                // if it greater empty tiedAddresses
                 // keep track of the tiedAddressesIndex so we know which addresses in the array are the highest voted
-                // this may have to go after 
                 tiedAddressesIndex = tiedAddresses.length;
                 tiedAddresses.push(application.submissionAddress());
                 
                 highestNumberOfVotes = application.voteCount();
                 addressesToPay = application.submissionAddress();
                 tiedResult = false;
-            } else if (application.voteCount() == highestNumberOfVotes) {
+            } else if ((application.voteCount() == highestNumberOfVotes) && (application.voteCount() > 0)) { // stops the first application with no votes from being counted
                 tiedAddresses.push(application.submissionAddress());
                 // emit Info(tiedResult);
                 tiedResult = true;
             }
             application.kill();
         }
-
-        // catch the case where no-one won / the applications list was empty
 
         PaymentPipe paymentPipe = PaymentPipe(paymentPipeAddress);
 
@@ -139,7 +135,7 @@ contract FundingApplications is AccessControl {
             }
             // let paymentPipe determine the share to pay to each winner
             paymentPipe.payWinners();
-        } else {
+        } else if (addressesToPay != address(0)) { // catch the case where no-one won / the applications list was empty
             paymentPipe.payWinner(addressesToPay);
         }
     }
