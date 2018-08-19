@@ -106,4 +106,108 @@ contract('PaymentPipe', function(accounts) {
 
       assert.equal(paymentPipeValueAfter, paymentPipeValueBefore + (value/100));
     });
+    it("only C level accounts can set new minimum payment amounts", async () => {
+      await paymentPipe.setNewMinimumPayment(400000000, {from: accounts[0], gasPrice: 0});
+      const newPaymentAmount = await paymentPipe.minimumPayment();
+      assert.equal(newPaymentAmount, 400000000);
+      try {
+        await paymentPipe.setNewMinimumPayment(200000000, {from: accounts[7], gasPrice: 0});
+      } catch (e) {
+
+      }
+      const newPaymentAmount2 = await paymentPipe.minimumPayment();
+
+      assert.equal(newPaymentAmount2, 400000000);
+    });
+    it("only C level accounts should be able to set the fundingApplication address", async () => {
+      let error = false;
+      try {
+        await paymentPipe.setFundingApplicationAddress(fundingApplication.address, {from: accounts[7], gasPrice: 0});
+      } catch (e) {
+        error = true;
+      }
+      assert.equal(error, true);
+    })
+    it("only the funding application address should be able to call payWinner", async () => {
+      await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, value: value, gasPrice: 0});
+
+      await paymentPipe.setFundingApplicationAddress(accounts[7], {from: accounts[0], gasPrice: 0});
+
+      await paymentPipe.payWinner(accounts[4], {from: accounts[7]});
+
+      // need to put more funds in to avoid the no funds exception
+      await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, value: value, gasPrice: 0});
+
+      let error = false;
+      try {
+        await paymentPipe.payWinner(accounts[4], {from: accounts[3]});
+      } catch (e) {
+        error = true;
+      }
+
+      assert.equal(error, true);
+    });
+    it("only the funding application address should be able to call payWinners", async () => {
+      await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, value: value, gasPrice: 0});
+
+      await paymentPipe.setFundingApplicationAddress(accounts[7], {from: accounts[0], gasPrice: 0});
+
+      await paymentPipe.setMultipleWinners(accounts[4], {from: accounts[7]});
+
+      await paymentPipe.payWinners({from: accounts[7]});
+
+      // need to put more funds in to avoid the no funds exception
+      await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, value: value, gasPrice: 0});
+
+      let error = false;
+      try {
+        await paymentPipe.payWinners({from: accounts[3]});
+      } catch (e) {
+        error = true;
+      }
+
+      assert.equal(error, true);
+    });
+    it("only the funding application address should be able to call setMultipleWinners", async () => {
+      await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, value: value, gasPrice: 0});
+
+      await paymentPipe.setFundingApplicationAddress(accounts[7], {from: accounts[0], gasPrice: 0});
+
+      await paymentPipe.setMultipleWinners(accounts[4], {from: accounts[7]});
+
+      let error = false;
+      try {
+        await paymentPipe.setMultipleWinners(accounts[4], {from: accounts[3]});
+      } catch (e) {
+        error = true;
+      }
+
+      assert.equal(error, true);
+    });
+    it("should not pay winners if the balance is 0", async () => {
+      await paymentPipe.setFundingApplicationAddress(accounts[7], {from: accounts[0], gasPrice: 0});
+
+      let error = false;
+      try {
+        await paymentPipe.payWinners(accounts[4], {from: accounts[7]});
+      } catch (e) {
+        error = true;
+      }
+
+      assert.equal(error, true);
+    });
+    it("should not be able to pay any winners if none have been set", async () => {
+      await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, value: value, gasPrice: 0});
+
+      await paymentPipe.setFundingApplicationAddress(accounts[7], {from: accounts[0], gasPrice: 0});
+
+      let error = false;
+      try {
+        await paymentPipe.payWinners({from: accounts[7]});
+      } catch (e) {
+        error = true;
+      }
+
+      assert.equal(error, true);
+    })
 });

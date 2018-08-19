@@ -21,11 +21,22 @@ contract PaymentPipe is AccessControl {
 
     address[] public playersToPay;
 
+    address public fundingApplicationAddress;
+    bool public fundingApplicationAddressSet;
+
     uint public minimumPayment;
 
     event WinnerPaid(
         address winner,
         uint amount
+    );
+
+    event NewFundingApplicationAddressSet(
+        address fundingApplicationAddress
+    );
+
+    event NewMinimumPaymentSet (
+        uint newMininmumPayment
     );
 
     event FallbackTriggered(
@@ -37,6 +48,22 @@ contract PaymentPipe is AccessControl {
         owner = msg.sender;
         opcToken = OPCToken(_opcToken);
         minimumPayment = 1000000000000000 wei;
+        fundingApplicationAddressSet = false;
+    }
+
+    modifier onlyFundingApplication() {
+        require(msg.sender == fundingApplicationAddress);
+        _;
+    }
+
+    modifier addressSetForFundingApplication() {
+        require(fundingApplicationAddressSet == true);
+        _;
+    }
+
+    modifier balanceIsNotZero() {
+        require(address(this).balance > 0);
+        _;
     }
 
     function() public payable {
@@ -44,13 +71,18 @@ contract PaymentPipe is AccessControl {
         emit FallbackTriggered(msg.sender, msg.value);
     }
 
-    function payWinner(address winner) external {
+    function payWinner(
+        address winner
+    ) 
+    external 
+    addressSetForFundingApplication 
+    onlyFundingApplication balanceIsNotZero {
         uint paymentAmount = address(this).balance;
         winner.transfer(paymentAmount);
         emit WinnerPaid(winner, paymentAmount);
     }
 
-    function payWinners() external {
+    function payWinners() external addressSetForFundingApplication onlyFundingApplication balanceIsNotZero {
         uint numberOfPlayers = playersToPay.length;
         uint amountToPay = address(this).balance.div(numberOfPlayers);
         for (uint i = 0; i < numberOfPlayers; i++) {
@@ -61,8 +93,19 @@ contract PaymentPipe is AccessControl {
         delete playersToPay;
     }
 
-    function setMultipleWinners(address winner) external {
+    function setMultipleWinners(address winner) external addressSetForFundingApplication onlyFundingApplication {
         playersToPay.push(winner);
+    }
+
+    function setFundingApplicationAddress(address _fundingApplicationAddress) public onlyCLevel {
+        fundingApplicationAddress = _fundingApplicationAddress;
+        fundingApplicationAddressSet = true;
+        emit NewFundingApplicationAddressSet(_fundingApplicationAddress);
+    }
+
+    function setNewMinimumPayment(uint newAmount) public onlyCLevel {
+        minimumPayment = newAmount;
+        emit NewMinimumPaymentSet(newAmount);
     }
 
     function payAccountWithOnePercentTax(address externalAccount) public payable {
@@ -115,15 +158,8 @@ contract PaymentPipe is AccessControl {
         return totalFunds;
     }
 
-    function issueRefund(address accountToRefund, uint amount) public onlyCLevel {
-      // TODO: this function makes no sense 
-        totalFunds -= amount;
-        accountToRefund.transfer(amount);
-    }
-
-    function payOut(address accountToPay, uint amountToPay) public onlyCLevel {
-        totalFunds -= amountToPay;
-        accountToPay.transfer(amountToPay);
+    function kill() public onlyCLevel {
+        selfdestruct(this);
     }
 
     function checkPaymentIsHighEnoughForToken() internal view returns (bool) {

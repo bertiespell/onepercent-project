@@ -18,6 +18,7 @@ contract('Application', function(accounts) {
         await opcToken.transferFrom(owner, paymentPipe.address, 1000);
 
         fundingApplication = await FundingApplications.new(paymentPipe.address, opcToken.address);
+        await paymentPipe.setFundingApplicationAddress(fundingApplication.address, {from: accounts[0], gasPrice: 0});
     });
 
     it("the applications submission account should be the account that the application was made from", async () => {
@@ -184,5 +185,66 @@ contract('Application', function(accounts) {
         assert.equal(aliceBalanceAfterVote.toNumber(), 1);  
         const paymentPipeBalanceAfterVote = await opcToken.balanceOf(paymentPipe.address);
         assert.equal(paymentPipeBalanceAfterVote.toNumber(), 999);
+    });
+    it("no accounts other than the funding application should be able to call kill", async () => {
+        await fundingApplication.openApplications({from: accounts[0]});
+
+        await fundingApplication.submitApplication(
+            "test application", 
+            "this is a test application requiring ", 
+            {
+                from: accounts[2],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        await fundingApplication.closeApplications({from: accounts[0]});
+        await fundingApplication.openVoting({from: accounts[0]});
+
+        application = await fundingApplication.proposals(0);
+        const applicationInstance = Application.at(application[1]);
+
+        let error1 = false;
+        try {
+            await applicationInstance.kill({from: accounts[0]});
+        } catch (e) {
+            error1 = true;
+        }
+
+        assert.equal(error1, true);
+
+        let error3 = false;
+        try {
+            await applicationInstance.kill({from: accounts[0]});
+        } catch (e) {
+            error3 = true;
+        }
+
+        assert.equal(error3, true);
+
+        let error4 = false;
+        try {
+            await applicationInstance.kill({from: accounts[0]});
+        } catch (e) {
+            error4 = true;
+        }
+
+        assert.equal(error4, true);
+
+        await fundingApplication.closeVoting({from: accounts[0]});
+        
+        let error5 = false;
+        
+        applicationAfterKill = await fundingApplication.proposals(0);
+        const applicationInstanceAfterKill = Application.at(applicationAfterKill[1]);
+        
+        try {
+            await applicationInstanceAfterKill.voteCount();
+        } catch (e) {
+            error5 = true;
+        }
+        assert.equal(error5, true);
     });
 });

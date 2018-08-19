@@ -14,6 +14,8 @@ module.exports = function(deployer) {
         });
 
         deployer.deploy(FundingApplications, PaymentPipe.address, OPCToken.address);
+
+        // TODO: set the funding application adress on paymentpipe
       });
     });
   });

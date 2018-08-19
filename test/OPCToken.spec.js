@@ -18,37 +18,6 @@ contract('OPCToken', function(accounts) {
         await opcToken.approve(owner, 1000)
         await opcToken.transferFrom(owner, paymentPipe.address, 1000);
     });
-    it("any C level address can open the contract for applications", async () => {
-        assert.equal(await opcToken.open(), false);
-
-        await opcToken.openApplications({from: owner});
-        assert.equal(await opcToken.open(), true);
-    });
-    it("any C level address can close the contract for applications", async () => {
-        assert.equal(await opcToken.open(), false);
-
-        await opcToken.openApplications({from: owner});
-        assert.equal(await opcToken.open(), true);
-
-        await opcToken.closeFunding({from: owner});
-        assert.equal(await opcToken.open(), false);
-    });
-    it("should prevent other accounts from opening and closing applications", async () => {
-        assert.equal(await opcToken.open(), false);
-
-        await opcToken.openApplications({from: owner});
-        assert.equal(await opcToken.open(), true);
-
-        await opcToken.closeFunding({from: owner});
-        assert.equal(await opcToken.open(), false);
-
-        try {
-            await opcToken.openApplications({from: accounts[3]});
-        } catch (e) {
-
-        }
-        assert.equal(await opcToken.open(), false);
-    });
     it("the entire total supply should begin with the owner", async () => {
         const ownerBalance = await opcToken.balanceOf(accounts[0]);
         const bigNumber = web3.fromWei(ownerBalance.toNumber(), "ether" )
@@ -78,5 +47,24 @@ contract('OPCToken', function(accounts) {
         const newBalance = await opcToken.balanceOf(alice)
         assert.notEqual(newBalance.toNumber(), 0);
         assert.equal(newBalance.toNumber(), 1);
-    })
+    });
+    it("C level accounts should be able to kill the contract", async () => {
+        await opcToken.kill({from: accounts[0], gasPrice: 0});
+        let error = false;
+        try {
+            await opcToken.name();
+        } catch (e) {
+            error = true;
+        }
+        assert.equal(error, true);
+    });
+    it("outside accounts should not be able to kill the contract", async () => {
+        let error = false;
+        try {
+            await opcToken.kill({from: accounts[6], gasPrice: 0});
+        } catch (e) {
+            error = true;
+        }
+        assert.equal(error, true);
+    });
 });

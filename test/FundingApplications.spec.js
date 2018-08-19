@@ -18,6 +18,7 @@ contract('FundingApplications', function(accounts) {
         await opcToken.transferFrom(owner, paymentPipe.address, 1000);
 
         fundingApplication = await FundingApplications.new(paymentPipe.address, opcToken.address);
+        await paymentPipe.setFundingApplicationAddress(fundingApplication.address, {from: accounts[0], gasPrice: 0});
     });
     it("an account should be able to submit a funding proposal when the contract is open for applications", async () => {
         await fundingApplication.openApplications({from: accounts[0]});

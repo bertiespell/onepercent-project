@@ -108,7 +108,7 @@ contract Application is AccessControl {
         voteCount = voteCount + numberOfTokens;
     }
 
-    function kill() isFundingApplication {
+    function kill() external isFundingApplication {
         selfdestruct(this);
     }
 }

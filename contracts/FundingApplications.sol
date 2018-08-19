@@ -110,15 +110,16 @@ contract FundingApplications is AccessControl {
         bool tiedResult = false;
         for (uint i = votingStartIndex; i < votingEndIndex; i++) {
             Application application = Application(proposals[i].fundingApplicationAddress);
-            if (application.voteCount() > highestNumberOfVotes) {
+            uint numVotes = application.voteCount();
+            if (numVotes > highestNumberOfVotes) {
                 // keep track of the tiedAddressesIndex so we know which addresses in the array are the highest voted
                 tiedAddressesIndex = tiedAddresses.length;
                 tiedAddresses.push(application.submissionAddress());
                 
-                highestNumberOfVotes = application.voteCount();
+                highestNumberOfVotes = numVotes;
                 addressesToPay = application.submissionAddress();
                 tiedResult = false;
-            } else if ((application.voteCount() == highestNumberOfVotes) && (application.voteCount() > 0)) { // stops the first application with no votes from being counted
+            } else if ((numVotes == highestNumberOfVotes) && (numVotes > 0)) { // stops the first application with no votes from being counted
                 tiedAddresses.push(application.submissionAddress());
                 // emit Info(tiedResult);
                 tiedResult = true;
@@ -175,5 +176,9 @@ contract FundingApplications is AccessControl {
             _applicationName,
             _description
         );
+    }
+
+    function kill() public onlyCLevel {
+        selfdestruct(this);
     }
 }
