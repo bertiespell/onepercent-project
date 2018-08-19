@@ -873,6 +873,170 @@ contract('FundingApplications', function(accounts) {
         assert.equal(error, undefined);
         assert.equal(paymentPipeBalanceBefore, paymentPipeBalanceAfter);
     });
+    it("should pay out multiple accounts if they are tied for votes, in multiple rounds", async () => {
+        await fundingApplication.openApplications({from: accounts[0]});
+
+        await fundingApplication.submitApplication(
+            "test application1", 
+            "this is a test 1111 application requiring ", 
+            {
+                from: accounts[5],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        await fundingApplication.submitApplication(
+            "test application2", 
+            "this is a test 2222 application requiring ", 
+            {
+                from: accounts[6],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        await fundingApplication.closeApplications({from: accounts[0]});
+        await fundingApplication.openVoting({from: accounts[0]});
+
+        application1 = await fundingApplication.proposals(0);
+        const application1Instance = Application.at(application1[1]);
+        application2 = await fundingApplication.proposals(1);
+        const application2Instance = Application.at(application2[1]);
+
+        await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, value: web3.toWei(1, "ether"), gasPrice: 0});
+
+        await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, value: web3.toWei(1, "ether"), gasPrice: 0});
+
+        await paymentPipe.payAccountWithOnePercentTax(bob, {from: accounts[3], value: web3.toWei(1, "ether"), gasPrice: 0});
+
+        await paymentPipe.payAccountWithOnePercentTax(bob, {from: accounts[3], value: web3.toWei(1, "ether"), gasPrice: 0});
+
+        const onePercentTotal = (web3.toWei(1, "ether") * 4)/100;
+
+        const firstWinningApplicationBalanceBefore = await web3.eth.getBalance(accounts[5]).toNumber();
+        const secondWinningApplicationBalanceBefore = await web3.eth.getBalance(accounts[6]).toNumber();
+
+        // now Alice has funds - she should be able to cast multiple votes
+        await opcToken.approve(application1Instance.address, 2, {from: alice, gasPrice: 0});
+        await opcToken.approve(application2Instance.address, 2, {from: accounts[3], gasPrice: 0});
+        await application1Instance.voteForApplication(2, {from: alice, gasPrice: 0});
+        await application2Instance.voteForApplication(2, {from: accounts[3], gasPrice: 0});
+
+        await fundingApplication.closeVoting({from: accounts[0]});
+
+        const firstWinningApplicationBalanceAfter = await web3.eth.getBalance(accounts[5]).toNumber();
+        const secondWinningApplicationBalanceAfter = await web3.eth.getBalance(accounts[6]).toNumber();
+        const paymentPipeBalanceAfter = await web3.eth.getBalance(paymentPipe.address).toNumber();
+
+        assert.equal(paymentPipeBalanceAfter, 0);
+        assert.equal(firstWinningApplicationBalanceAfter, firstWinningApplicationBalanceBefore + (onePercentTotal/2));
+        assert.equal(secondWinningApplicationBalanceAfter, secondWinningApplicationBalanceBefore + (onePercentTotal/2))
+
+        /** SECOND ROUND OF VOTING */
+
+        await fundingApplication.openApplications({from: accounts[0]});
+
+        await fundingApplication.submitApplication(
+            "test application1", 
+            "this is a test 1111 application requiring ", 
+            {
+                from: accounts[7],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        await fundingApplication.submitApplication(
+            "test application2", 
+            "this is a test 2222 application requiring ", 
+            {
+                from: accounts[8],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        await fundingApplication.closeApplications({from: accounts[0]});
+        await fundingApplication.openVoting({from: accounts[0]});
+
+        application3 = await fundingApplication.proposals(2);
+        const application3Instance = Application.at(application3[1]);
+        application4 = await fundingApplication.proposals(3);
+        const application4Instance = Application.at(application4[1]);
+
+        await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, value: web3.toWei(1, "ether"), gasPrice: 0});
+
+        await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, value: web3.toWei(1, "ether"), gasPrice: 0});
+
+        await paymentPipe.payAccountWithOnePercentTax(bob, {from: accounts[4], value: web3.toWei(1, "ether"), gasPrice: 0});
+
+        await paymentPipe.payAccountWithOnePercentTax(bob, {from: accounts[4], value: web3.toWei(1, "ether"), gasPrice: 0});
+
+        const onePercentTotalSecondRound = (web3.toWei(1, "ether") * 4)/100;
+
+        const thirdWinningApplicationBalanceBefore = await web3.eth.getBalance(accounts[7]).toNumber();
+        const fourthWinningApplicationBalanceBefore = await web3.eth.getBalance(accounts[8]).toNumber();
+
+        // now Alice has funds - she should be able to cast multiple votes
+        await opcToken.approve(application3Instance.address, 2, {from: alice, gasPrice: 0});
+        await opcToken.approve(application4Instance.address, 2, {from: accounts[4], gasPrice: 0});
+        await application3Instance.voteForApplication(2, {from: alice, gasPrice: 0});
+        await application4Instance.voteForApplication(2, {from: accounts[4], gasPrice: 0});
+
+        await fundingApplication.closeVoting({from: accounts[0]});
+
+        const thirdWinningApplicationBalanceAfter = await web3.eth.getBalance(accounts[7]).toNumber();
+        const fourthWinningApplicationBalanceAfter = await web3.eth.getBalance(accounts[8]).toNumber();
+        const paymentPipeBalanceAfterSecondRound = await web3.eth.getBalance(paymentPipe.address).toNumber();
+
+        assert.equal(paymentPipeBalanceAfterSecondRound, 0);
+        assert.equal(thirdWinningApplicationBalanceAfter, thirdWinningApplicationBalanceBefore + (onePercentTotalSecondRound/2));
+        assert.equal(fourthWinningApplicationBalanceAfter, fourthWinningApplicationBalanceBefore + (onePercentTotalSecondRound/2));
+
+        // the old checks from the first round should still be true
+        assert.equal(paymentPipeBalanceAfterSecondRound, 0);
+        assert.equal(firstWinningApplicationBalanceAfter, firstWinningApplicationBalanceBefore + (onePercentTotalSecondRound/2));
+        assert.equal(secondWinningApplicationBalanceAfter, secondWinningApplicationBalanceBefore + (onePercentTotalSecondRound/2));
+
+        /** THIRD ROUND OF VOTING */
+
+        await fundingApplication.openApplications({from: accounts[0]});
+        
+        await fundingApplication.submitApplication(
+            "test application1", 
+            "this is a test 1111 application requiring ", 
+            {
+                from: accounts[5],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, value: web3.toWei(1, "ether"), gasPrice: 0});
+        
+        const paymentPipeBalanceBeforeThirdRound = await web3.eth.getBalance(paymentPipe.address).toNumber();
+
+        await fundingApplication.closeApplications({from: accounts[0]});
+        await fundingApplication.openVoting({from: accounts[0]});
+
+        let error;
+        try {
+            await fundingApplication.closeVoting({from: accounts[0]});
+        } catch (e) {
+            error = e;
+        }
+
+        const paymentPipeBalanceAfterThirdRound = await web3.eth.getBalance(paymentPipe.address).toNumber();
+
+        assert.equal(error, undefined);
+        assert.equal(paymentPipeBalanceBeforeThirdRound, paymentPipeBalanceAfterThirdRound);
+    });
     it("when voting closes - the winner should be reimbursed with the ether funds from the paymentPipe", async () => {
        
     });
