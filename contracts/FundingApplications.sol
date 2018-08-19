@@ -2,6 +2,7 @@ pragma solidity ^0.4.23;
 import "./AccessControl.sol";
 import "./SafeMath.sol";
 import "./Application.sol";
+import "./PaymentPipe.sol";
 
 
 contract FundingApplications is AccessControl {
@@ -22,6 +23,8 @@ contract FundingApplications is AccessControl {
     address public opcTokenAddress;
     address public paymentPipeAddress;
 
+    address[] public tiedAddresses;
+    
     struct Proposal {
         address submissionAddress;
         address fundingApplicationAddress;
@@ -101,19 +104,41 @@ contract FundingApplications is AccessControl {
 
     function closeVoting() external onlyCLevel applicationsClosed votingIsOpen {
         votingOpen = false;
-        Proposal memory highestNumberOfVotes;
-        uint proposalsArrayLength = proposals.length;
-        for (uint i = lastOpenApplicationsIndex; i < proposalsArrayLength; i++) {
-            Application(proposals[i].fundingApplicationAddress).closeApplicationToVoting();
-            // funds should be allocated primarily to an application which has met targer *AND* has the highest number of votes
-            // if none have met target, funds are allocated to the application with the highest number of votes
+        uint highestVotes = 0;
+        address addressesToPay;
+        uint tiedAddressesIndex = tiedAddresses.length;
+        bool tiedResult = false;
+        for (uint i = votingStartIndex; i < votingEndIndex; i++) {
+            Application application = Application(proposals[i].fundingApplicationAddress);
+            uint votes = application.voteCount();
+            if (votes > highestVotes) {
+                // keep track of the tiedAddressesIndex so we know which addresses in the array are the highest voted
+                tiedAddressesIndex = tiedAddresses.length;
+                tiedAddresses.push(application.submissionAddress());
+                
+                highestVotes = votes;
+                addressesToPay = application.submissionAddress();
+                tiedResult = false;
+            } else if ((votes == highestVotes) && (votes > 0)) { // stops the first application with no votes from being counted
+                tiedAddresses.push(application.submissionAddress());
+                // emit Info(tiedResult);
+                tiedResult = true;
+            }
+            application.kill();
+        }
 
-            // PSUEDO-CODE:
+        PaymentPipe paymentPipe = PaymentPipe(paymentPipeAddress);
 
-            // close each application to voting
-            // check whether it is the highest votes
-            // check whether is has met target
-        }   
+        if (tiedResult) {
+            for (uint j = tiedAddressesIndex; j < tiedAddresses.length; j++) {
+                // set each payee to be a winner
+                paymentPipe.setMultipleWinners(tiedAddresses[j]);
+            }
+            // let paymentPipe determine the share to pay to each winner
+            paymentPipe.payWinners();
+        } else if (addressesToPay != address(0)) { // catch the case where no-one won / the applications list was empty
+            paymentPipe.payWinner(addressesToPay);
+        }
     }
 
     function setApplicationCostInWei(uint newCost) external onlyCLevel {
@@ -151,5 +176,9 @@ contract FundingApplications is AccessControl {
             _applicationName,
             _description
         );
+    }
+
+    function kill() public onlyCLevel {
+        selfdestruct(this);
     }
 }

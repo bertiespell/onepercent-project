@@ -18,6 +18,7 @@ contract('FundingApplications', function(accounts) {
         await opcToken.transferFrom(owner, paymentPipe.address, 1000);
 
         fundingApplication = await FundingApplications.new(paymentPipe.address, opcToken.address);
+        await paymentPipe.setFundingApplicationAddress(fundingApplication.address, {from: accounts[0], gasPrice: 0});
     });
     it("an account should be able to submit a funding proposal when the contract is open for applications", async () => {
         await fundingApplication.openApplications({from: accounts[0]});
@@ -467,11 +468,24 @@ contract('FundingApplications', function(accounts) {
         const application3Instance = Application.at(application3[1]);
         const application4Instance = Application.at(application4[1]);
 
-        const firstIsOpenLater = await application1Instance.isOpenToVote();
-        const secondIsOpenLater = await application2Instance.isOpenToVote();
+        // these contracts should now be deleted and unavailable
 
-        assert.equal(firstIsOpenLater, false);
-        assert.equal(secondIsOpenLater, false);
+        let shouldBeDeleted = false;
+        try {
+            await application1Instance.isOpenToVote();
+        } catch (e) {
+            shouldBeDeleted = true;
+        }
+
+        let shouldBeDeleted2 = false;
+        try {
+            await application2Instance.isOpenToVote();
+        } catch (e) {
+            shouldBeDeleted2 = true;
+        }
+
+        assert.equal(shouldBeDeleted, true);
+        assert.equal(shouldBeDeleted2, true);
 
         const thirdIsOpenBefore = await application3Instance.isOpenToVote();
         const fourthIsOpenBefore = await application4Instance.isOpenToVote();
@@ -515,22 +529,88 @@ contract('FundingApplications', function(accounts) {
         const application5Instance = Application.at(application5[1]);
         const application6Instance = Application.at(application6[1]);
 
-        const firstIsOpenEvenLater = await application1Instance.isOpenToVote();
-        const secondIsOpenEvenLater = await application2Instance.isOpenToVote();
-        const thirdIsOpenEvenLater = await application3Instance.isOpenToVote();
-        const fourthIsOpenEvenLater = await application4Instance.isOpenToVote();
-
-        assert.equal(firstIsOpenEvenLater, false);
-        assert.equal(secondIsOpenEvenLater, false);
-        assert.equal(thirdIsOpenEvenLater, false);
-        assert.equal(fourthIsOpenEvenLater, false);
-
         const fifthIsOpenBefore = await application5Instance.isOpenToVote();
         const sixthIsOpenBefore = await application6Instance.isOpenToVote();
 
         assert.equal(fifthIsOpenBefore, true);
         assert.equal(sixthIsOpenBefore, true);
     });
+    it("should call kill on contracts after voting has finished", async () => {
+        await fundingApplication.openApplications({from: accounts[0]});
+
+        await fundingApplication.submitApplication(
+            "test application5", 
+            "this is a test 5555 application requiring ", 
+            {
+                from: accounts[2],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        await fundingApplication.submitApplication(
+            "test application6", 
+            "this is a test 6666 applicationrequiring ", 
+            {
+                from: accounts[2],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        await fundingApplication.closeApplications({from: accounts[0]});
+        await fundingApplication.openVoting({from: accounts[0]});
+
+        application5 = await fundingApplication.proposals(0);
+        application6 = await fundingApplication.proposals(1);
+
+        const application5Instance = Application.at(application5[1]);
+        const application6Instance = Application.at(application6[1]);
+
+        // these should all error now since selfdestuct has now been called
+
+        // console.log('what is this actually', fundingApplication.proposals(0))
+        let error1;
+        try {
+            const firstIsOpenEvenLater = await application1Instance.isOpenToVote();
+        } catch (e) {
+            error1 = e;
+        }
+        
+        let error2;
+        try {
+            const secondIsOpenEvenLater = await application2Instance.isOpenToVote();
+        } catch (e) {
+            error2 = e;
+        }
+
+        let error3;
+        try {
+            const thirdIsOpenEvenLater = await application3Instance.isOpenToVote();
+        } catch (e) {
+            error3 = e;
+        }
+
+        let error4;
+        try {
+            const fourthIsOpenEvenLater = await application4Instance.isOpenToVote();
+        } catch (e) {
+            error4 = e;
+        }
+
+        assert.notEqual(error1, undefined);
+        assert.notEqual(error2, undefined);
+        assert.notEqual(error3, undefined);
+        assert.notEqual(error4, undefined);
+
+        const fifthIsOpenBefore = await application5Instance.isOpenToVote();
+        const sixthIsOpenBefore = await application6Instance.isOpenToVote();
+
+        assert.equal(fifthIsOpenBefore, true);
+        assert.equal(sixthIsOpenBefore, true);
+    })
     it("only c level accounts can open and close applications", async () => {
         await fundingApplication.setCEO(accounts[1], {from: owner});
         await fundingApplication.setCOO(accounts[2], {from: accounts[1]});
@@ -721,9 +801,320 @@ contract('FundingApplications', function(accounts) {
         assert.equal(votingOpen, false);
     });
     it("when voting closes - the correct last winner should be emitted", async () => {
-       
+        await fundingApplication.openApplications({from: accounts[0]});
+
+        await fundingApplication.submitApplication(
+            "test application1", 
+            "this is a test 1111 application requiring ", 
+            {
+                from: accounts[5],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        await fundingApplication.submitApplication(
+            "test application2", 
+            "this is a test 2222 application requiring ", 
+            {
+                from: accounts[6],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        await fundingApplication.closeApplications({from: accounts[0]});
+        await fundingApplication.openVoting({from: accounts[0]});
+
+        application1 = await fundingApplication.proposals(0);
+        const application1Instance = Application.at(application1[1]);
+        application2 = await fundingApplication.proposals(0);
+        const application2Instance = Application.at(application2[1]);
+
+        await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, value: web3.toWei(1, "ether"), gasPrice: 0});
+
+        await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, value: web3.toWei(1, "ether"), gasPrice: 0});
+
+        await paymentPipe.payAccountWithOnePercentTax(bob, {from: accounts[3], value: web3.toWei(1, "ether"), gasPrice: 0});
+
+        const onePercentTotal = (web3.toWei(1, "ether") * 3)/100;
+
+        const winningApplicationBalanceBefore = await web3.eth.getBalance(accounts[5]).toNumber();
+        const paymentPipeBalanceBefore = await web3.eth.getBalance(paymentPipe.address).toNumber();
+
+        // now Alice has funds - she should be able to cast multiple votes
+        await opcToken.approve(application1Instance.address, 2, {from: alice, gasPrice: 0});
+        await opcToken.approve(application2Instance.address, 1, {from: accounts[3], gasPrice: 0});
+        await application1Instance.voteForApplication(2, {from: alice, gasPrice: 0});
+        await application2Instance.voteForApplication(1, {from: accounts[3], gasPrice: 0});
+
+        await fundingApplication.closeVoting({from: accounts[0]});
+
+        const winningApplicationBalanceAfter = await web3.eth.getBalance(accounts[5]).toNumber();
+        const paymentPipeBalanceAfter = await web3.eth.getBalance(paymentPipe.address).toNumber();
+
+        assert.equal(paymentPipeBalanceAfter, 0);
+        assert.equal(winningApplicationBalanceAfter, winningApplicationBalanceBefore + onePercentTotal);
     });
-    it("when voting closes - the winner should be reimbursed with the ether funds from the paymentPipe", async () => {
-       
+    it("should pay out multiple accounts if they are tied for votes", async () => {
+        await fundingApplication.openApplications({from: accounts[0]});
+
+        await fundingApplication.submitApplication(
+            "test application1", 
+            "this is a test 1111 application requiring ", 
+            {
+                from: accounts[5],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        await fundingApplication.submitApplication(
+            "test application2", 
+            "this is a test 2222 application requiring ", 
+            {
+                from: accounts[6],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        await fundingApplication.closeApplications({from: accounts[0]});
+        await fundingApplication.openVoting({from: accounts[0]});
+
+        application1 = await fundingApplication.proposals(0);
+        const application1Instance = Application.at(application1[1]);
+        application2 = await fundingApplication.proposals(1);
+        const application2Instance = Application.at(application2[1]);
+
+        await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, value: web3.toWei(1, "ether"), gasPrice: 0});
+
+        await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, value: web3.toWei(1, "ether"), gasPrice: 0});
+
+        await paymentPipe.payAccountWithOnePercentTax(bob, {from: accounts[3], value: web3.toWei(1, "ether"), gasPrice: 0});
+
+        await paymentPipe.payAccountWithOnePercentTax(bob, {from: accounts[3], value: web3.toWei(1, "ether"), gasPrice: 0});
+
+        const onePercentTotal = (web3.toWei(1, "ether") * 4)/100;
+
+        const firstWinningApplicationBalanceBefore = await web3.eth.getBalance(accounts[5]).toNumber();
+        const secondWinningApplicationBalanceBefore = await web3.eth.getBalance(accounts[6]).toNumber();
+
+        // now Alice has funds - she should be able to cast multiple votes
+        await opcToken.approve(application1Instance.address, 2, {from: alice, gasPrice: 0});
+        await opcToken.approve(application2Instance.address, 2, {from: accounts[3], gasPrice: 0});
+        await application1Instance.voteForApplication(2, {from: alice, gasPrice: 0});
+        await application2Instance.voteForApplication(2, {from: accounts[3], gasPrice: 0});
+
+        await fundingApplication.closeVoting({from: accounts[0]});
+
+        const firstWinningApplicationBalanceAfter = await web3.eth.getBalance(accounts[5]).toNumber();
+        const secondWinningApplicationBalanceAfter = await web3.eth.getBalance(accounts[6]).toNumber();
+        const paymentPipeBalanceAfter = await web3.eth.getBalance(paymentPipe.address).toNumber();
+
+        assert.equal(paymentPipeBalanceAfter, 0);
+        assert.equal(firstWinningApplicationBalanceAfter, firstWinningApplicationBalanceBefore + (onePercentTotal/2));
+        assert.equal(secondWinningApplicationBalanceAfter, secondWinningApplicationBalanceBefore + (onePercentTotal/2))
+    });
+    it("should pay not pay out if there are no winner", async () => {
+        await fundingApplication.openApplications({from: accounts[0]});
+        
+        await fundingApplication.submitApplication(
+            "test application1", 
+            "this is a test 1111 application requiring ", 
+            {
+                from: accounts[5],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, value: web3.toWei(1, "ether"), gasPrice: 0});
+        
+        const paymentPipeBalanceBefore = await web3.eth.getBalance(paymentPipe.address).toNumber();
+
+        await fundingApplication.closeApplications({from: accounts[0]});
+        await fundingApplication.openVoting({from: accounts[0]});
+
+        let error;
+        try {
+            await fundingApplication.closeVoting({from: accounts[0]});
+        } catch (e) {
+            error = e;
+        }
+
+        const paymentPipeBalanceAfter = await web3.eth.getBalance(paymentPipe.address).toNumber();
+
+        assert.equal(error, undefined);
+        assert.equal(paymentPipeBalanceBefore, paymentPipeBalanceAfter);
+    });
+    it("should pay out multiple accounts if they are tied for votes, in multiple rounds", async () => {
+        await fundingApplication.openApplications({from: accounts[0]});
+
+        await fundingApplication.submitApplication(
+            "test application1", 
+            "this is a test 1111 application requiring ", 
+            {
+                from: accounts[5],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        await fundingApplication.submitApplication(
+            "test application2", 
+            "this is a test 2222 application requiring ", 
+            {
+                from: accounts[6],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        await fundingApplication.closeApplications({from: accounts[0]});
+        await fundingApplication.openVoting({from: accounts[0]});
+
+        application1 = await fundingApplication.proposals(0);
+        const application1Instance = Application.at(application1[1]);
+        application2 = await fundingApplication.proposals(1);
+        const application2Instance = Application.at(application2[1]);
+
+        await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, value: web3.toWei(1, "ether"), gasPrice: 0});
+
+        await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, value: web3.toWei(1, "ether"), gasPrice: 0});
+
+        await paymentPipe.payAccountWithOnePercentTax(bob, {from: accounts[3], value: web3.toWei(1, "ether"), gasPrice: 0});
+
+        await paymentPipe.payAccountWithOnePercentTax(bob, {from: accounts[3], value: web3.toWei(1, "ether"), gasPrice: 0});
+
+        const onePercentTotal = (web3.toWei(1, "ether") * 4)/100;
+
+        const firstWinningApplicationBalanceBefore = await web3.eth.getBalance(accounts[5]).toNumber();
+        const secondWinningApplicationBalanceBefore = await web3.eth.getBalance(accounts[6]).toNumber();
+
+        // now Alice has funds - she should be able to cast multiple votes
+        await opcToken.approve(application1Instance.address, 2, {from: alice, gasPrice: 0});
+        await opcToken.approve(application2Instance.address, 2, {from: accounts[3], gasPrice: 0});
+        await application1Instance.voteForApplication(2, {from: alice, gasPrice: 0});
+        await application2Instance.voteForApplication(2, {from: accounts[3], gasPrice: 0});
+
+        await fundingApplication.closeVoting({from: accounts[0]});
+
+        const firstWinningApplicationBalanceAfter = await web3.eth.getBalance(accounts[5]).toNumber();
+        const secondWinningApplicationBalanceAfter = await web3.eth.getBalance(accounts[6]).toNumber();
+        const paymentPipeBalanceAfter = await web3.eth.getBalance(paymentPipe.address).toNumber();
+
+        assert.equal(paymentPipeBalanceAfter, 0);
+        assert.equal(firstWinningApplicationBalanceAfter, firstWinningApplicationBalanceBefore + (onePercentTotal/2));
+        assert.equal(secondWinningApplicationBalanceAfter, secondWinningApplicationBalanceBefore + (onePercentTotal/2))
+
+        /** SECOND ROUND OF VOTING */
+
+        await fundingApplication.openApplications({from: accounts[0]});
+
+        await fundingApplication.submitApplication(
+            "test application1", 
+            "this is a test 1111 application requiring ", 
+            {
+                from: accounts[7],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        await fundingApplication.submitApplication(
+            "test application2", 
+            "this is a test 2222 application requiring ", 
+            {
+                from: accounts[8],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        await fundingApplication.closeApplications({from: accounts[0]});
+        await fundingApplication.openVoting({from: accounts[0]});
+
+        application3 = await fundingApplication.proposals(2);
+        const application3Instance = Application.at(application3[1]);
+        application4 = await fundingApplication.proposals(3);
+        const application4Instance = Application.at(application4[1]);
+
+        await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, value: web3.toWei(1, "ether"), gasPrice: 0});
+
+        await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, value: web3.toWei(1, "ether"), gasPrice: 0});
+
+        await paymentPipe.payAccountWithOnePercentTax(bob, {from: accounts[4], value: web3.toWei(1, "ether"), gasPrice: 0});
+
+        await paymentPipe.payAccountWithOnePercentTax(bob, {from: accounts[4], value: web3.toWei(1, "ether"), gasPrice: 0});
+
+        const onePercentTotalSecondRound = (web3.toWei(1, "ether") * 4)/100;
+
+        const thirdWinningApplicationBalanceBefore = await web3.eth.getBalance(accounts[7]).toNumber();
+        const fourthWinningApplicationBalanceBefore = await web3.eth.getBalance(accounts[8]).toNumber();
+
+        // now Alice has funds - she should be able to cast multiple votes
+        await opcToken.approve(application3Instance.address, 2, {from: alice, gasPrice: 0});
+        await opcToken.approve(application4Instance.address, 2, {from: accounts[4], gasPrice: 0});
+        await application3Instance.voteForApplication(2, {from: alice, gasPrice: 0});
+        await application4Instance.voteForApplication(2, {from: accounts[4], gasPrice: 0});
+
+        await fundingApplication.closeVoting({from: accounts[0]});
+
+        const thirdWinningApplicationBalanceAfter = await web3.eth.getBalance(accounts[7]).toNumber();
+        const fourthWinningApplicationBalanceAfter = await web3.eth.getBalance(accounts[8]).toNumber();
+        const paymentPipeBalanceAfterSecondRound = await web3.eth.getBalance(paymentPipe.address).toNumber();
+
+        assert.equal(paymentPipeBalanceAfterSecondRound, 0);
+        assert.equal(thirdWinningApplicationBalanceAfter, thirdWinningApplicationBalanceBefore + (onePercentTotalSecondRound/2));
+        assert.equal(fourthWinningApplicationBalanceAfter, fourthWinningApplicationBalanceBefore + (onePercentTotalSecondRound/2));
+
+        // the old checks from the first round should still be true
+        assert.equal(paymentPipeBalanceAfterSecondRound, 0);
+        assert.equal(firstWinningApplicationBalanceAfter, firstWinningApplicationBalanceBefore + (onePercentTotalSecondRound/2));
+        assert.equal(secondWinningApplicationBalanceAfter, secondWinningApplicationBalanceBefore + (onePercentTotalSecondRound/2));
+
+        /** THIRD ROUND OF VOTING */
+
+        await fundingApplication.openApplications({from: accounts[0]});
+        
+        await fundingApplication.submitApplication(
+            "test application1", 
+            "this is a test 1111 application requiring ", 
+            {
+                from: accounts[5],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, value: web3.toWei(1, "ether"), gasPrice: 0});
+        
+        const paymentPipeBalanceBeforeThirdRound = await web3.eth.getBalance(paymentPipe.address).toNumber();
+
+        await fundingApplication.closeApplications({from: accounts[0]});
+        await fundingApplication.openVoting({from: accounts[0]});
+
+        let error;
+        try {
+            await fundingApplication.closeVoting({from: accounts[0]});
+        } catch (e) {
+            error = e;
+        }
+
+        const paymentPipeBalanceAfterThirdRound = await web3.eth.getBalance(paymentPipe.address).toNumber();
+
+        assert.equal(error, undefined);
+        assert.equal(paymentPipeBalanceBeforeThirdRound, paymentPipeBalanceAfterThirdRound);
     });
 });

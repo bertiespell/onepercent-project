@@ -2,9 +2,12 @@ pragma solidity ^0.4.23;
 
 import "./AccessControl.sol";
 import { OPCToken } from "./OPCToken.sol";
+import "./SafeMath.sol";
 
 
 contract PaymentPipe is AccessControl {
+
+    using SafeMath for uint;
 
     address externalContractAddress;
 
@@ -16,6 +19,26 @@ contract PaymentPipe is AccessControl {
 
     OPCToken public opcToken;
 
+    address[] public playersToPay;
+
+    address public fundingApplicationAddress;
+    bool public fundingApplicationAddressSet;
+
+    uint public minimumPayment;
+
+    event WinnerPaid(
+        address winner,
+        uint amount
+    );
+
+    event NewFundingApplicationAddressSet(
+        address fundingApplicationAddress
+    );
+
+    event NewMinimumPaymentSet (
+        uint newMininmumPayment
+    );
+
     event FallbackTriggered(
         address indexed sender,
         uint value
@@ -24,6 +47,23 @@ contract PaymentPipe is AccessControl {
     constructor(address _opcToken) public {
         owner = msg.sender;
         opcToken = OPCToken(_opcToken);
+        minimumPayment = 1000000000000000 wei;
+        fundingApplicationAddressSet = false;
+    }
+
+    modifier onlyFundingApplication() {
+        require(msg.sender == fundingApplicationAddress);
+        _;
+    }
+
+    modifier addressSetForFundingApplication() {
+        require(fundingApplicationAddressSet == true);
+        _;
+    }
+
+    modifier balanceIsNotZero() {
+        require(address(this).balance > 0);
+        _;
     }
 
     function() public payable {
@@ -31,11 +71,50 @@ contract PaymentPipe is AccessControl {
         emit FallbackTriggered(msg.sender, msg.value);
     }
 
+    function payWinner(
+        address winner
+    ) 
+    external 
+    addressSetForFundingApplication 
+    onlyFundingApplication balanceIsNotZero {
+        uint paymentAmount = address(this).balance;
+        winner.transfer(paymentAmount);
+        emit WinnerPaid(winner, paymentAmount);
+    }
+
+    function payWinners() external addressSetForFundingApplication onlyFundingApplication balanceIsNotZero {
+        uint numberOfPlayers = playersToPay.length;
+        uint amountToPay = address(this).balance.div(numberOfPlayers);
+        for (uint i = 0; i < numberOfPlayers; i++) {
+            // pay the winner
+            playersToPay[i].transfer(amountToPay);
+            emit WinnerPaid(playersToPay[i], amountToPay);
+        }
+        delete playersToPay;
+    }
+
+    function setMultipleWinners(address winner) external addressSetForFundingApplication onlyFundingApplication {
+        playersToPay.push(winner);
+    }
+
+    function setFundingApplicationAddress(address _fundingApplicationAddress) public onlyCLevel {
+        fundingApplicationAddress = _fundingApplicationAddress;
+        fundingApplicationAddressSet = true;
+        emit NewFundingApplicationAddressSet(_fundingApplicationAddress);
+    }
+
+    function setNewMinimumPayment(uint newAmount) public onlyCLevel {
+        minimumPayment = newAmount;
+        emit NewMinimumPaymentSet(newAmount);
+    }
+
     function payAccountWithOnePercentTax(address externalAccount) public payable {
         uint onePercent = msg.value/100;
         totalFunds += onePercent;
         uint totalToSend = msg.value - onePercent;
-        opcToken.transfer(msg.sender, 1);
+        if (checkPaymentIsHighEnoughForToken()) {
+            opcToken.transfer(msg.sender, 1);
+        }
         externalAccount.transfer(totalToSend);
     }
 
@@ -70,21 +149,20 @@ contract PaymentPipe is AccessControl {
 
             mstore(0x40, add(ptr, 0x24)) // Set storage pointer to new space
         }
-        opcToken.transfer(msg.sender, 1);
+        if (checkPaymentIsHighEnoughForToken()) {
+            opcToken.transfer(msg.sender, 1);
+        }
     }
 
     function getTotalFunds() public view returns (uint) {
         return totalFunds;
     }
 
-    function issueRefund(address accountToRefund, uint amount) public onlyCLevel {
-      // TODO: this function makes no sense 
-        totalFunds -= amount;
-        accountToRefund.transfer(amount);
+    function kill() public onlyCLevel {
+        selfdestruct(this);
     }
 
-    function payOut(address accountToPay, uint amountToPay) public onlyCLevel {
-        totalFunds -= amountToPay;
-        accountToPay.transfer(amountToPay);
+    function checkPaymentIsHighEnoughForToken() internal view returns (bool) {
+        return msg.value >= minimumPayment;
     }
 }
