@@ -66,7 +66,7 @@ contract('Application', function(accounts) {
         const paymentPipeBalance = await opcToken.balanceOf(paymentPipe.address)
         assert.equal(paymentPipeBalance.toNumber(), 1000);
 
-        await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, gasPrice: 0});
+        await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, value: web3.toWei(1, "ether"), gasPrice: 0});
         const aliceNewBalance = await opcToken.balanceOf(alice)
         assert.equal(aliceNewBalance.toNumber(), 1);  
         const paymentPipeNewBalance = await opcToken.balanceOf(paymentPipe.address)
@@ -114,9 +114,9 @@ contract('Application', function(accounts) {
         const paymentPipeBalance = await opcToken.balanceOf(paymentPipe.address)
         assert.equal(paymentPipeBalance.toNumber(), 1000);
 
-        await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, gasPrice: 0});
+        await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, value: web3.toWei(1, "ether"), gasPrice: 0});
 
-        await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, gasPrice: 0});
+        await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, value: web3.toWei(1, "ether"), gasPrice: 0});
         const aliceNewBalance = await opcToken.balanceOf(alice)
         assert.equal(aliceNewBalance.toNumber(), 2);  
         const paymentPipeNewBalance = await opcToken.balanceOf(paymentPipe.address)
@@ -161,12 +161,13 @@ contract('Application', function(accounts) {
         const paymentPipeBalance = await opcToken.balanceOf(paymentPipe.address)
         assert.equal(paymentPipeBalance.toNumber(), 1000);
 
-        await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, gasPrice: 0});
+        await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, value: web3.toWei(1, "ether"), gasPrice: 0});
         const aliceNewBalance = await opcToken.balanceOf(alice)
         assert.equal(aliceNewBalance.toNumber(), 1);  
         const paymentPipeNewBalance = await opcToken.balanceOf(paymentPipe.address)
         assert.equal(paymentPipeNewBalance.toNumber(), 999);
         
+        const votes = await applicationInstance.voteCount();
         await fundingApplication.closeVoting({from: accounts[0]});
 
         let error;
@@ -177,7 +178,6 @@ contract('Application', function(accounts) {
             error = e;
         }
 
-        const votes = await applicationInstance.voteCount();
         assert.equal(votes.toNumber(), 0);
         assert.notEqual(error, undefined);
         const aliceBalanceAfterVote = await opcToken.balanceOf(alice)

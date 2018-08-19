@@ -64,9 +64,36 @@ contract('PaymentPipe', function(accounts) {
       var aliceBalanceAfter = await web3.eth.getBalance(alice).toNumber();
       assert.equal(externalAccountBalanceAfter, externalAccountBalanceBefore + (value - (value/100)), `The balance of the external account should increase by ${value}`);
     });
+    it("should not give out OPC tokens when no ether is sent to payAccountWithOnePercentTax", async () => {
+      const aliceBalance = await opcToken.balanceOf(alice);
+      assert.equal(aliceBalance.toNumber(), 0);
+      const paymentPipeBalance = await opcToken.balanceOf(paymentPipe.address)
+      assert.equal(paymentPipeBalance.toNumber(), 1000);
 
-    it("should not give out OPC tokens when no ether is sent", async () => {
+      await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, gasPrice: 0});
 
+      await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, gasPrice: 0});
+      const aliceNewBalance = await opcToken.balanceOf(alice)
+      assert.equal(aliceNewBalance.toNumber(), 0);  
+      const paymentPipeNewBalance = await opcToken.balanceOf(paymentPipe.address)
+      assert.equal(paymentPipeNewBalance.toNumber(), paymentPipeBalance);
+    });
+    it("should not give out OPC tokens when no ether is sent to callExternalContractWithOnePercentTax", async () => {
+      const externalAccount = await ExternalContractExample.deployed();
+
+      const aliceBalance = await opcToken.balanceOf(alice);
+      assert.equal(aliceBalance.toNumber(), 0);
+      const paymentPipeBalance = await opcToken.balanceOf(paymentPipe.address)
+      assert.equal(paymentPipeBalance.toNumber(), 1000);
+
+      await paymentPipe.callExternalContractWithOnePercentTax(externalAccount.address, "paymentExample()", {from: alice, gasPrice: 0});
+
+      await paymentPipe.callExternalContractWithOnePercentTax(externalAccount.address, "paymentExample()", {from: alice, gasPrice: 0});
+
+      const aliceNewBalance = await opcToken.balanceOf(alice)
+      assert.equal(aliceNewBalance.toNumber(), aliceBalance);  
+      const paymentPipeNewBalance = await opcToken.balanceOf(paymentPipe.address)
+      assert.equal(paymentPipeNewBalance.toNumber(), paymentPipeBalance);
     });
     it("should increase the ether in the payment pipe contract after call to pay external contract", async () => {
       const externalAccount = await ExternalContractExample.deployed();

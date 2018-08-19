@@ -467,11 +467,24 @@ contract('FundingApplications', function(accounts) {
         const application3Instance = Application.at(application3[1]);
         const application4Instance = Application.at(application4[1]);
 
-        const firstIsOpenLater = await application1Instance.isOpenToVote();
-        const secondIsOpenLater = await application2Instance.isOpenToVote();
+        // these contracts should now be deleted and unavailable
 
-        assert.equal(firstIsOpenLater, false);
-        assert.equal(secondIsOpenLater, false);
+        let shouldBeDeleted = false;
+        try {
+            await application1Instance.isOpenToVote();
+        } catch (e) {
+            shouldBeDeleted = true;
+        }
+
+        let shouldBeDeleted2 = false;
+        try {
+            await application2Instance.isOpenToVote();
+        } catch (e) {
+            shouldBeDeleted2 = true;
+        }
+
+        assert.equal(shouldBeDeleted, true);
+        assert.equal(shouldBeDeleted2, true);
 
         const thirdIsOpenBefore = await application3Instance.isOpenToVote();
         const fourthIsOpenBefore = await application4Instance.isOpenToVote();
@@ -515,22 +528,88 @@ contract('FundingApplications', function(accounts) {
         const application5Instance = Application.at(application5[1]);
         const application6Instance = Application.at(application6[1]);
 
-        const firstIsOpenEvenLater = await application1Instance.isOpenToVote();
-        const secondIsOpenEvenLater = await application2Instance.isOpenToVote();
-        const thirdIsOpenEvenLater = await application3Instance.isOpenToVote();
-        const fourthIsOpenEvenLater = await application4Instance.isOpenToVote();
-
-        assert.equal(firstIsOpenEvenLater, false);
-        assert.equal(secondIsOpenEvenLater, false);
-        assert.equal(thirdIsOpenEvenLater, false);
-        assert.equal(fourthIsOpenEvenLater, false);
-
         const fifthIsOpenBefore = await application5Instance.isOpenToVote();
         const sixthIsOpenBefore = await application6Instance.isOpenToVote();
 
         assert.equal(fifthIsOpenBefore, true);
         assert.equal(sixthIsOpenBefore, true);
     });
+    it("should call kill on contracts after voting has finished", async () => {
+        await fundingApplication.openApplications({from: accounts[0]});
+
+        await fundingApplication.submitApplication(
+            "test application5", 
+            "this is a test 5555 application requiring ", 
+            {
+                from: accounts[2],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        await fundingApplication.submitApplication(
+            "test application6", 
+            "this is a test 6666 applicationrequiring ", 
+            {
+                from: accounts[2],
+                value: web3.toWei(0.004, "ether"), 
+                gasPrice: 0
+
+            }
+        );
+
+        await fundingApplication.closeApplications({from: accounts[0]});
+        await fundingApplication.openVoting({from: accounts[0]});
+
+        application5 = await fundingApplication.proposals(0);
+        application6 = await fundingApplication.proposals(1);
+
+        const application5Instance = Application.at(application5[1]);
+        const application6Instance = Application.at(application6[1]);
+
+        // these should all error now since selfdestuct has now been called
+
+        // console.log('what is this actually', fundingApplication.proposals(0))
+        let error1;
+        try {
+            const firstIsOpenEvenLater = await application1Instance.isOpenToVote();
+        } catch (e) {
+            error1 = e;
+        }
+        
+        let error2;
+        try {
+            const secondIsOpenEvenLater = await application2Instance.isOpenToVote();
+        } catch (e) {
+            error2 = e;
+        }
+
+        let error3;
+        try {
+            const thirdIsOpenEvenLater = await application3Instance.isOpenToVote();
+        } catch (e) {
+            error3 = e;
+        }
+
+        let error4;
+        try {
+            const fourthIsOpenEvenLater = await application4Instance.isOpenToVote();
+        } catch (e) {
+            error4 = e;
+        }
+
+        assert.notEqual(error1, undefined);
+        assert.notEqual(error2, undefined);
+        assert.notEqual(error3, undefined);
+        assert.notEqual(error4, undefined);
+
+        const fifthIsOpenBefore = await application5Instance.isOpenToVote();
+        const sixthIsOpenBefore = await application6Instance.isOpenToVote();
+
+        assert.equal(fifthIsOpenBefore, true);
+        assert.equal(sixthIsOpenBefore, true);
+    })
     it("only c level accounts can open and close applications", async () => {
         await fundingApplication.setCEO(accounts[1], {from: owner});
         await fundingApplication.setCOO(accounts[2], {from: accounts[1]});
@@ -1036,8 +1115,5 @@ contract('FundingApplications', function(accounts) {
 
         assert.equal(error, undefined);
         assert.equal(paymentPipeBalanceBeforeThirdRound, paymentPipeBalanceAfterThirdRound);
-    });
-    it("when voting closes - the winner should be reimbursed with the ether funds from the paymentPipe", async () => {
-       
     });
 });

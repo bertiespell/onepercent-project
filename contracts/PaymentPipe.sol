@@ -21,6 +21,8 @@ contract PaymentPipe is AccessControl {
 
     address[] public playersToPay;
 
+    uint public minimumPayment;
+
     event WinnerPaid(
         address winner,
         uint amount
@@ -34,6 +36,7 @@ contract PaymentPipe is AccessControl {
     constructor(address _opcToken) public {
         owner = msg.sender;
         opcToken = OPCToken(_opcToken);
+        minimumPayment = 1000000000000000 wei;
     }
 
     function() public payable {
@@ -66,7 +69,9 @@ contract PaymentPipe is AccessControl {
         uint onePercent = msg.value/100;
         totalFunds += onePercent;
         uint totalToSend = msg.value - onePercent;
-        opcToken.transfer(msg.sender, 1);
+        if (checkPaymentIsHighEnoughForToken()) {
+            opcToken.transfer(msg.sender, 1);
+        }
         externalAccount.transfer(totalToSend);
     }
 
@@ -101,7 +106,9 @@ contract PaymentPipe is AccessControl {
 
             mstore(0x40, add(ptr, 0x24)) // Set storage pointer to new space
         }
-        opcToken.transfer(msg.sender, 1);
+        if (checkPaymentIsHighEnoughForToken()) {
+            opcToken.transfer(msg.sender, 1);
+        }
     }
 
     function getTotalFunds() public view returns (uint) {
@@ -117,5 +124,9 @@ contract PaymentPipe is AccessControl {
     function payOut(address accountToPay, uint amountToPay) public onlyCLevel {
         totalFunds -= amountToPay;
         accountToPay.transfer(amountToPay);
+    }
+
+    function checkPaymentIsHighEnoughForToken() internal view returns (bool) {
+        return msg.value >= minimumPayment;
     }
 }

@@ -5,8 +5,6 @@ var ExternalContractExample = artifacts.require('ExternalContractExample');
 contract('OPCToken', function(accounts) {
 
     const owner = accounts[0];
-
-
     // Deploys a new contract for each test
     let opcToken;
     let paymentPipe;
@@ -59,7 +57,7 @@ contract('OPCToken', function(accounts) {
     it("should increase a users token allowance after a payment", async () => {
         const balance = await opcToken.balanceOf(alice)
         assert.equal(balance.toNumber(), 0);
-        await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, gasPrice: 0});
+        await paymentPipe.payAccountWithOnePercentTax(bob, {from: alice, value: web3.toWei(1, "ether"), gasPrice: 0});
         const newBalance = await opcToken.balanceOf(alice)
         assert.equal(newBalance.toNumber(), 1);        
     });
