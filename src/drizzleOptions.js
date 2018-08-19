@@ -1,5 +1,6 @@
 import PaymentPipe from '../build/contracts/PaymentPipe.json';
 import ExternalContractExample from '../build/contracts/ExternalContractExample.json';
+import FundingApplications from "../build/contracts/FundingApplications.json";
 
 const drizzleOptions = {
   web3: {
@@ -11,7 +12,8 @@ const drizzleOptions = {
   },
   contracts: [
     ExternalContractExample,
-    PaymentPipe
+    PaymentPipe,
+    FundingApplications,
   ],
   events: {
     ExternalContractExample: ['ExternalContractPaid']

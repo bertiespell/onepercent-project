@@ -135,7 +135,7 @@ class Payments extends React.Component {
       date
     ]
 
-    const transactionIndex = await this.contracts.PaymentPipe.methods.callExternalContractWithOnePercentTax.cacheSend(address, "paymentExample()", {from: this.props.accounts[0], value: amount, gasPrice: 10});
+    const transactionIndex = await this.contracts.PaymentPipe.methods.callExternalContractWithOnePercentTax.cacheSend(address, "paymentExample()", {from: this.props.accounts[0], value: amount, gasPrice: 10000000});
 
     const reduxData = payment.concat();
     reduxData.push(amount/100);
