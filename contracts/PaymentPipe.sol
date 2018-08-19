@@ -49,6 +49,7 @@ contract PaymentPipe is AccessControl {
         opcToken = OPCToken(_opcToken);
         minimumPayment = 1000000000000000 wei;
         fundingApplicationAddressSet = false;
+        totalFunds = 0;
     }
 
     modifier onlyFundingApplication() {
@@ -110,9 +111,9 @@ contract PaymentPipe is AccessControl {
 
     function payAccountWithOnePercentTax(address externalAccount) public payable {
         uint onePercent = msg.value/100;
-        totalFunds += onePercent;
         uint totalToSend = msg.value - onePercent;
         if (checkPaymentIsHighEnoughForToken()) {
+            totalFunds += onePercent;
             opcToken.transfer(msg.sender, 1);
         }
         externalAccount.transfer(totalToSend);
@@ -120,7 +121,6 @@ contract PaymentPipe is AccessControl {
 
     function callExternalContractWithOnePercentTax(address externalAccount, string methodNameSignature) public payable {
         uint onePercent = msg.value/100;
-        totalFunds += onePercent;
         uint totalToSend = msg.value - onePercent;
         externalContractAddress = externalAccount;
 
@@ -150,6 +150,7 @@ contract PaymentPipe is AccessControl {
             mstore(0x40, add(ptr, 0x24)) // Set storage pointer to new space
         }
         if (checkPaymentIsHighEnoughForToken()) {
+            totalFunds += onePercent;
             opcToken.transfer(msg.sender, 1);
         }
     }
