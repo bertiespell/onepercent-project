@@ -152,7 +152,16 @@ class Funding extends React.Component {
             </Button>
           </GridItem>
         </Grid>
+        <Grid container>
+          <GridItem xs={12} sm={12} md={12}>
 
+          The current status of the contract:
+          <br/>
+          Applications are open: {String(this.applicationsAreOpen)}
+          <br/>
+          Voting is open: {String(this.votingIsOpen)}
+          </GridItem>
+        </Grid>
         <Grid container>
               <GridItem xs={12} sm={12} md={4}>
                 <Card chart>
