@@ -243,7 +243,9 @@ const mapStateToProps = state => {
 }
 
 const mapDispatchToProps = dispatch => {
-  return {}
+  return {
+    submitApplication: (application) => dispatch(submitApplication(application)),
+  }
 }
 
 export default drizzleConnect(withStyles(style)(Funding), mapStateToProps, mapDispatchToProps);
