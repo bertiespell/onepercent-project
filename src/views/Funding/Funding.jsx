@@ -10,6 +10,14 @@ import GridItem from "components/Grid/GridItem.jsx";
 import CardBody from "components/Card/CardBody.jsx";
 import CardFooter from "components/Card/CardFooter.jsx";
 import Button from "components/CustomButtons/Button.jsx";
+
+import InputLabel from "@material-ui/core/InputLabel";
+import CustomInput from "components/CustomInput/CustomInput.jsx";
+
+import submitApplication from "../../actions/submit-application";
+
+import Application from "../../../build/contracts/Application.json";
+
 const Web3 = require('web3');// @material-ui/core components
 
 const style = {
@@ -68,6 +76,7 @@ class Funding extends React.Component {
     super(props);
     const { classes } = props;
     this.classes = classes;
+    this.drizzle = context.drizzle;
 
     // store methods to check the status of the contract 
     this.areApplicationsOpenTransactionalObject = context.drizzle.contracts.FundingApplications.methods.getApplicationStatus();
@@ -109,119 +118,248 @@ class Funding extends React.Component {
 
   async componentDidUpdate () {
     this.applicationsAreOpen = await this.areApplicationsOpenTransactionalObject.call();
-    console.log('are applics open?!', this.applicationsAreOpen);
     this.votingIsOpen = await this.isVotingOpenTransactionalObject.call();
-    console.log('Is voting open?', this.votingIsOpen)
   }
+
+  async submitApplication() {
+    const transactionObject = this.context.drizzle.contracts.FundingApplications.methods.submitApplication("Build a school", "We'd like funds to build a new school in our town");
+
+    const data = await transactionObject.send({from: this.props.accounts[0], value: this.drizzle.web3.utils.toWei(String(0.004), "ether")});
+
+    const applicationAddress = data.events.ApplicationSubmitted.address;
+
+
+    var currentProvider = new Web3.providers.HttpProvider('http://localhost:7545'); 
+    const web3Instance = new Web3(currentProvider);
+
+    const application = new web3Instance.eth.Contract(Application.abi, applicationAddress);
+
+    this.props.submitApplication(application);
+  }
+
+  async voteForApplication(contract) {
+    const transactionalObject = contract.methods.voteForApplication(1);
+    const transaction = await transactionalObject.send({from: this.props.accounts[0]});
+  } 
     
   render() {
 
     return (
-      <Card>
-        <CardHeader color="primary">
-          <h4 className={this.classes.cardTitleWhite}>Projects</h4>
-          <p className={this.classes.cardCategoryWhite}>
-            View and vote for projects to receive funding
-          </p>
-        </CardHeader>
-        <Grid container>
-          <GridItem xs={12} sm={12} md={12}>
+      <div>
+        <Card>
+          <CardHeader color="primary">
+            <h4 className={this.classes.cardTitleWhite}>Projects</h4>
+            <p className={this.classes.cardCategoryWhite}>
+              View and vote for projects to receive funding
+            </p>
+          </CardHeader>
+          <Grid container>
+            <GridItem xs={12} sm={12} md={12}>
 
-          <p>These controls would not be here in the final dapp, they would be controlled by the C level accounts. They are here for ease when interacting with the dapp during testing...</p>
-          </GridItem>
-        </Grid>
-        <Grid container>
-          <GridItem xs={4} sm={4} md={3} onClick={() => this.openApplications()}>
-            <Button color="primary" round>
-                Open Applications
-            </Button>
-          </GridItem>
-          <GridItem xs={4} sm={4} md={3}>
-            <Button color="primary" round onClick={() => this.closeApplications()}>
-                Close Applications
-            </Button>
-          </GridItem>
-          <GridItem xs={4} sm={4} md={3}>
-            <Button color="primary" round onClick={() => this.openVoting()}>
-                Open Voting
-            </Button>
-          </GridItem>
-          <GridItem xs={4} sm={4} md={3}>
-            <Button color="primary" round onClick={() => this.closeVoting()}>
-                Close Voting
-            </Button>
-          </GridItem>
-        </Grid>
-        <Grid container>
-          <GridItem xs={12} sm={12} md={12}>
+            <p>These controls would not be here in the final dapp, they would be controlled by the C level accounts. They are here for ease when interacting with the dapp during testing...</p>
+            </GridItem>
+          </Grid>
+          <Grid container>
+            <GridItem xs={4} sm={4} md={3} onClick={() => this.openApplications()}>
+              <Button color="primary" round>
+                  Open Applications
+              </Button>
+            </GridItem>
+            <GridItem xs={4} sm={4} md={3}>
+              <Button color="primary" round onClick={() => this.closeApplications()}>
+                  Close Applications
+              </Button>
+            </GridItem>
+            <GridItem xs={4} sm={4} md={3}>
+              <Button color="primary" round onClick={() => this.openVoting()}>
+                  Open Voting
+              </Button>
+            </GridItem>
+            <GridItem xs={4} sm={4} md={3}>
+              <Button color="primary" round onClick={() => this.closeVoting()}>
+                  Close Voting
+              </Button>
+            </GridItem>
+          </Grid>
+          <Grid container>
+            <GridItem xs={12} sm={12} md={12}>
 
-          The current status of the contract:
-          <br/>
-          Applications are open: {String(this.applicationsAreOpen)}
-          <br/>
-          Voting is open: {String(this.votingIsOpen)}
+            The current status of the contract:
+            <br/>
+            Applications are open: {String(this.applicationsAreOpen)}
+            <br/>
+            Voting is open: {String(this.votingIsOpen)}
+            </GridItem>
+          </Grid>
+          <Grid container>
+                <GridItem xs={12} sm={12} md={4}>
+                  <Card chart>
+                    <CardHeader color="success">
+                      ohhhh go on then
+                    </CardHeader>
+                    <CardBody>
+                      <h4 className={this.classes.cardTitle}>Daily Sales</h4>
+                      <p className={this.classes.cardCategory}>
+                        <span className={this.classes.successText}>
+                          no arrow here
+                        </span>{" "}
+                        increase in today sales.
+                      </p>
+                    </CardBody>
+                    <CardFooter chart>
+                      <div className={this.classes.stats}>
+                        Noooo time
+                      </div>
+                    </CardFooter>
+                  </Card>
+                </GridItem>
+                <GridItem xs={12} sm={12} md={4}>
+                  <Card chart>
+                    <CardHeader color="warning">
+                      hellllloooo
+                    </CardHeader>
+                    <CardBody>
+                      <h4 className={this.classes.cardTitle}>Email Subscriptions</h4>
+                      <p className={this.classes.cardCategory}>
+                        Last Campaign Performance
+                      </p>
+                    </CardBody>
+                    <CardFooter chart>
+                      <div className={this.classes.stats}>
+                        Nooooo time
+                      </div>
+                    </CardFooter>
+                  </Card>
+                </GridItem>
+                <GridItem xs={12} sm={12} md={4}>
+                  <Card chart>
+                    <CardHeader color="danger">
+                      hello
+                    </CardHeader>
+                    <CardBody>
+                      <h4 className={this.classes.cardTitle}>Completed Tasks</h4>
+                      <p className={this.classes.cardCategory}>
+                        Last Campaign Performance
+                      </p>
+                    </CardBody>
+                    <CardFooter chart>
+                      <div className={this.classes.stats}>
+                        No access time
+                      </div>
+                    </CardFooter>
+                  </Card>
+                </GridItem>
+              </Grid>
+        </Card>
+
+
+      <Grid container>
+          <GridItem xs={12} sm={12} md={2}>
           </GridItem>
-        </Grid>
-        <Grid container>
-              <GridItem xs={12} sm={12} md={4}>
-                <Card chart>
-                  <CardHeader color="success">
-                    ohhhh go on then
-                  </CardHeader>
-                  <CardBody>
-                    <h4 className={this.classes.cardTitle}>Daily Sales</h4>
-                    <p className={this.classes.cardCategory}>
-                      <span className={this.classes.successText}>
-                        no arrow here
-                      </span>{" "}
-                      increase in today sales.
-                    </p>
-                  </CardBody>
-                  <CardFooter chart>
-                    <div className={this.classes.stats}>
-                      Noooo time
-                    </div>
-                  </CardFooter>
-                </Card>
-              </GridItem>
-              <GridItem xs={12} sm={12} md={4}>
-                <Card chart>
-                  <CardHeader color="warning">
-                    hellllloooo
-                  </CardHeader>
-                  <CardBody>
-                    <h4 className={this.classes.cardTitle}>Email Subscriptions</h4>
-                    <p className={this.classes.cardCategory}>
-                      Last Campaign Performance
-                    </p>
-                  </CardBody>
-                  <CardFooter chart>
-                    <div className={this.classes.stats}>
-                      Nooooo time
-                    </div>
-                  </CardFooter>
-                </Card>
-              </GridItem>
-              <GridItem xs={12} sm={12} md={4}>
-                <Card chart>
-                  <CardHeader color="danger">
-                    hello
-                  </CardHeader>
-                  <CardBody>
-                    <h4 className={this.classes.cardTitle}>Completed Tasks</h4>
-                    <p className={this.classes.cardCategory}>
-                      Last Campaign Performance
-                    </p>
-                  </CardBody>
-                  <CardFooter chart>
-                    <div className={this.classes.stats}>
-                      No access time
-                    </div>
-                  </CardFooter>
-                </Card>
-              </GridItem>
-            </Grid>
-      </Card>
+        <GridItem xs={12} sm={12} md={8}>
+          <Card>
+            <CardHeader color="primary">
+              <h4 className={this.classes.cardTitleWhite}>Application</h4>
+              <p className={this.classes.cardCategoryWhite}>Submit a funding application</p>
+            </CardHeader>
+            <CardBody>
+              <Grid container>
+                <GridItem xs={12} sm={12} md={3}>
+                  <CustomInput
+                    labelText="Project Name"
+                    id="username"
+                    formControlProps={{
+                      fullWidth: true
+                    }}
+                  />
+                </GridItem>
+                <GridItem xs={12} sm={12} md={4}>
+                  <CustomInput
+                    labelText="Email address"
+                    id="email-address"
+                    formControlProps={{
+                      fullWidth: true
+                    }}
+                  />
+                </GridItem>
+              </Grid>
+              <Grid container>
+                <GridItem xs={12} sm={12} md={6}>
+                  <CustomInput
+                    labelText="First Name"
+                    id="first-name"
+                    formControlProps={{
+                      fullWidth: true
+                    }}
+                  />
+                </GridItem>
+                <GridItem xs={12} sm={12} md={6}>
+                  <CustomInput
+                    labelText="Last Name"
+                    id="last-name"
+                    formControlProps={{
+                      fullWidth: true
+                    }}
+                  />
+                </GridItem>
+              </Grid>
+              <Grid container>
+                <GridItem xs={12} sm={12} md={4}>
+                  <CustomInput
+                    labelText="City"
+                    id="city"
+                    formControlProps={{
+                      fullWidth: true
+                    }}
+                  />
+                </GridItem>
+                <GridItem xs={12} sm={12} md={4}>
+                  <CustomInput
+                    labelText="Country"
+                    id="country"
+                    formControlProps={{
+                      fullWidth: true
+                    }}
+                  />
+                </GridItem>
+                <GridItem xs={12} sm={12} md={4}>
+                  <CustomInput
+                    labelText="Postal Code"
+                    id="postal-code"
+                    formControlProps={{
+                      fullWidth: true
+                    }}
+                  />
+                </GridItem>
+              </Grid>
+              <Grid container>
+                <GridItem xs={12} sm={12} md={12}>
+                  <InputLabel style={{ color: "#AAAAAA" }}>Description</InputLabel>
+                  <CustomInput
+                    labelText="Explain what your idea is, and what you would use the funding for"
+                    id="about-me"
+                    formControlProps={{
+                      fullWidth: true
+                    }}
+                    inputProps={{
+                      multiline: true,
+                      rows: 5
+                    }}
+                  />
+                </GridItem>
+              </Grid>
+            </CardBody>
+            <CardFooter>
+              <Button color="primary" onClick={() => this.submitApplication()}>Submit Application</Button>
+            </CardFooter>
+          </Card>
+          <GridItem xs={12} sm={12} md={4}>
+          </GridItem>
+        </GridItem>
+      </Grid>
+      <Button color="primary" onClick={() => this.voteForApplication()}>Vote For Application</Button>
+
+      </div>
     );
   }
 }
