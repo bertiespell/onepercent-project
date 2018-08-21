@@ -181,4 +181,12 @@ contract FundingApplications is AccessControl {
     function kill() public onlyCLevel {
         selfdestruct(this);
     }
+
+    function getVotingStatus() public view returns (bool) {
+        return votingOpen;
+    }
+
+    function getApplicationStatus() public view returns (bool) {
+        return applicationsOpen;
+    }
 }

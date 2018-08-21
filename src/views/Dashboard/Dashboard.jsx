@@ -33,16 +33,16 @@ class Dashboard extends React.Component {
   UserOPCTokens;
   personallyGenerated;
   globallyGenerated;
-  globallyGeneratedCacheCall;
+  globallyGeneratedTransactionObject;
   generatedAmmount = 0;
-  opcTokenCacheCall;
+  opcTokenTransactionObject;
   opcBalance = 0;
 
   constructor(props, context) {
     super(props)
-    this.globallyGeneratedCacheCall = context.drizzle.contracts.PaymentPipe.methods.totalFunds();
-
-    this.opcTokenCacheCall = context.drizzle.contracts.OPCToken.methods.balanceOf(this.props.accounts[0]);
+    this.globallyGeneratedTransactionObject = context.drizzle.contracts.PaymentPipe.methods.totalFunds();
+    console.log(context.drizzle.contracts.PaymentPipe)
+    this.opcTokenTransactionObject = context.drizzle.contracts.OPCToken.methods.balanceOf(this.props.accounts[0]);
     
   }
 
@@ -65,11 +65,11 @@ class Dashboard extends React.Component {
     const state = this.context.drizzle.store.getState();
     this.paymentsMade = state.transactionStack.length;
  
-    this.globallyGenerated = await this.globallyGeneratedCacheCall.call()
+    this.globallyGenerated = await this.globallyGeneratedTransactionObject.call()
 
     this.generatedAmount = Number(this.context.drizzle.web3.utils.fromWei(this.globallyGenerated)).toFixed(2);
 
-    this.opcBalance = await this.opcTokenCacheCall.call();
+    this.opcBalance = await this.opcTokenTransactionObject.call();
   }
 
   async findAccounts() {
