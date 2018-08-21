@@ -139,9 +139,20 @@ class Funding extends React.Component {
 
   async voteForApplication(contract) {
     console.log('Attempting to vote for', contract);
+
+    // await opcToken.approve(contract.address, 1, {from: accounts[3], gasPrice: 0});
+
+    const approvalObject = this.context.drizzle.contracts.OPCToken.methods.approve(contract._address, this.props.accounts[0]);
+    const approvalGas = await approvalObject.estimateGas();
+    const approvalTransaction = await approvalObject.send({from: this.props.accounts[0], gas: approvalGas*2});
+    console.log(approvalTransaction);
+
+
     const transactionalObject = contract.methods.voteForApplication(1);
     console.log(transactionalObject)
-    const transaction = await transactionalObject.send({from: this.props.accounts[0]});
+    const gas = await transactionalObject.estimateGas();
+    console.log(gas);
+    const transaction = await transactionalObject.send({from: this.props.accounts[0], gas: gas*2});
   } 
     
   render() {
@@ -413,6 +424,7 @@ const mapStateToProps = state => {
     FundingApplications: state.contracts.FundingApplications,
     drizzleStatus: state.drizzleStatus,
     applications: state.paymentDataReducer.applications,
+    OPCToken: state.contracts.OPCToken,
   }
 }
 
