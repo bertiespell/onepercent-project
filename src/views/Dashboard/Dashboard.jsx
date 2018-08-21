@@ -35,10 +35,15 @@ class Dashboard extends React.Component {
   globallyGenerated;
   globallyGeneratedCacheCall;
   generatedAmmount = 0;
+  opcTokenCacheCall;
+  opcBalance = 0;
 
   constructor(props, context) {
     super(props)
-    this.globallyGeneratedCacheCall = context.drizzle.contracts.PaymentPipe.methods.totalFunds.call();
+    this.globallyGeneratedCacheCall = context.drizzle.contracts.PaymentPipe.methods.totalFunds();
+
+    this.opcTokenCacheCall = context.drizzle.contracts.OPCToken.methods.balanceOf(this.props.accounts[0]);
+    
   }
 
   state = {
@@ -63,6 +68,8 @@ class Dashboard extends React.Component {
     this.globallyGenerated = await this.globallyGeneratedCacheCall.call()
 
     this.generatedAmount = Number(this.context.drizzle.web3.utils.fromWei(this.globallyGenerated)).toFixed(2);
+
+    this.opcBalance = await this.opcTokenCacheCall.call();
   }
 
   async findAccounts() {
@@ -105,7 +112,7 @@ class Dashboard extends React.Component {
                 </CardIcon>
                 <p className={classes.cardCategory}>OPC Tokens</p>
                 <h3 className={classes.cardTitle}>
-                  {/* <ContractData contract="PaymentPipe" method="getCoinBalance"/> */}
+                  {this.opcBalance}
                 </h3>
               </CardHeader>
               <CardFooter stats>
@@ -171,7 +178,7 @@ const mapStateToProps = state => {
   return {
     accounts: state.accounts,
     SimpleStorage: state.contracts.SimpleStorage,
-    TutorialToken: state.contracts.TutorialToken,
+    OPCToken: state.contracts.OPCToken,
     drizzleStatus: state.drizzleStatus,
     paymentValue: state.paymentDataReducer.paymentValue,
     paymentPipeContract: state.contracts.PaymentPipe,

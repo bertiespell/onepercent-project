@@ -1,6 +1,7 @@
 import PaymentPipe from '../build/contracts/PaymentPipe.json';
 import ExternalContractExample from '../build/contracts/ExternalContractExample.json';
 import FundingApplications from "../build/contracts/FundingApplications.json";
+import OPCToken from "../build/contracts/OPCToken.json";
 
 const drizzleOptions = {
   web3: {
@@ -14,6 +15,7 @@ const drizzleOptions = {
     ExternalContractExample,
     PaymentPipe,
     FundingApplications,
+    OPCToken,
   ],
   events: {
     ExternalContractExample: ['ExternalContractPaid']
