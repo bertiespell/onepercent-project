@@ -33,7 +33,16 @@ const paymentDataReducer = (state = initialState, action) => {
     }
     case SUBMIT_APPLICATION: {
       const newState = Object.assign({}, state);
-      newState.applications.push(action.data);
+      
+      const applicationData = action.name;
+      const applicationDescription = action.description;
+      
+      const newApplication = {
+        applicationInstance: action.data,
+        name: applicationData,
+        description: applicationDescription,
+      };
+      newState.applications.push(newApplication);
       return newState
     }
     default:

@@ -121,8 +121,8 @@ class Funding extends React.Component {
     this.votingIsOpen = await this.isVotingOpenTransactionalObject.call();
   }
 
-  async submitApplication() {
-    const transactionObject = this.context.drizzle.contracts.FundingApplications.methods.submitApplication("Build a school", "We'd like funds to build a new school in our town");
+  async submitApplication(name, description) {
+    const transactionObject = this.context.drizzle.contracts.FundingApplications.methods.submitApplication(name, description);
 
     const data = await transactionObject.send({from: this.props.accounts[0], value: this.drizzle.web3.utils.toWei(String(0.004), "ether")});
 
@@ -134,15 +134,49 @@ class Funding extends React.Component {
 
     const application = new web3Instance.eth.Contract(Application.abi, applicationAddress);
 
-    this.props.submitApplication(application);
+    this.props.submitApplication(application, name, description);
   }
 
   async voteForApplication(contract) {
+    console.log('Attempting to vote for', contract);
     const transactionalObject = contract.methods.voteForApplication(1);
+    console.log(transactionalObject)
     const transaction = await transactionalObject.send({from: this.props.accounts[0]});
   } 
     
   render() {
+    const classNames = ['success', "warning", "danger"];
+    let classNamesIndex = 3;
+    const gridItems = this.props.applications.map(((application, index) => {
+      classNamesIndex++;
+      if (classNamesIndex > 2) {
+          classNamesIndex = 0;
+      }
+      return (
+        <GridItem xs={12} sm={12} md={4} key={index}>
+          <Card chart>
+            <CardHeader color={classNames[classNamesIndex]}>
+              {application.applicationInstance._address}
+            </CardHeader>
+            <CardBody>
+              <h4 className={this.classes.cardTitle}>{application.name}</h4>
+              <p className={this.classes.cardCategory}>
+                <span className={this.classes.successText}>
+                {application.description}
+                </span>{" "}
+              </p>
+            </CardBody>
+            <CardFooter chart>
+              <div className={this.classes.stats}>
+              <Button color="info" round onClick={() => this.voteForApplication(application.applicationInstance)}>
+                  Vote for this Application!
+              </Button>
+              </div>
+            </CardFooter>
+          </Card>
+        </GridItem>
+      )
+    }))
 
     return (
       <div>
@@ -192,7 +226,10 @@ class Funding extends React.Component {
             </GridItem>
           </Grid>
           <Grid container>
-                <GridItem xs={12} sm={12} md={4}>
+
+{gridItems}
+
+                {/* <GridItem xs={12} sm={12} md={4}>
                   <Card chart>
                     <CardHeader color="success">
                       ohhhh go on then
@@ -248,7 +285,7 @@ class Funding extends React.Component {
                       </div>
                     </CardFooter>
                   </Card>
-                </GridItem>
+                </GridItem> */}
               </Grid>
         </Card>
 
@@ -350,15 +387,13 @@ class Funding extends React.Component {
               </Grid>
             </CardBody>
             <CardFooter>
-              <Button color="primary" onClick={() => this.submitApplication()}>Submit Application</Button>
+              <Button color="primary" onClick={() => this.submitApplication("Build a school", "We'd like funds to build a new school in our town")}>Submit Application</Button>
             </CardFooter>
           </Card>
           <GridItem xs={12} sm={12} md={4}>
           </GridItem>
         </GridItem>
       </Grid>
-      <Button color="primary" onClick={() => this.voteForApplication()}>Vote For Application</Button>
-
       </div>
     );
   }
@@ -377,12 +412,13 @@ const mapStateToProps = state => {
     accounts: state.accounts,
     FundingApplications: state.contracts.FundingApplications,
     drizzleStatus: state.drizzleStatus,
+    applications: state.paymentDataReducer.applications,
   }
 }
 
 const mapDispatchToProps = dispatch => {
   return {
-    submitApplication: (application) => dispatch(submitApplication(application)),
+    submitApplication: (application, name, description) => dispatch(submitApplication(application, name, description)),
   }
 }
 
