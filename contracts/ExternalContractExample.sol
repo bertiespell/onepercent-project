@@ -6,15 +6,17 @@ contract ExternalContractExample {
 
     uint public totalPaidIn;
 
+    /// @dev emitted when a payment is made
     event ExternalContractPaid(
         string _message,
         uint amount
     );
 
-    constructor () {
+    constructor () public {
         totalPaidIn = 10;
     }
 
+    /// @dev an example payable method to interact with the payment pipe
     function paymentExample() public payable {
         totalPaidIn += msg.value;
         emit ExternalContractPaid("External Contract was paid!", msg.value);
