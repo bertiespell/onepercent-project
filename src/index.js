@@ -15,9 +15,11 @@ import "assets/css/material-dashboard-react.css?v=1.3.0";
 
 import indexRoutes from "routes/index.jsx";
 
+require('dotenv').config();
+
 const hist = createBrowserHistory();
 
-getWeb3(process.env.ETHEREUM_NODE)
+getWeb3(process.env.REACT_APP_ETHEREUM_NODE)
 .then(results => {
   console.log('Web3 initialized!')
 })

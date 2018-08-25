@@ -138,15 +138,9 @@ class Funding extends React.Component {
     }
     const events = []
     
-    // // Using an action
-    // dispatch({type: 'ADD_CONTRACT', drizzle, contractConfig, events, web3})
-    
-    // Or using the Drizzle context object
     this.context.drizzle.addContract({contractConfig, events})
 
-    console.log(this.context, this.props);
 
-    // var currentProvider = new Web3.providers.HttpProvider('http://localhost:7545'); 
     const web3Instance = new Web3(this.context.drizzle.web3.currentProvider);
 
     const application = new web3Instance.eth.Contract(Application.abi, applicationAddress);

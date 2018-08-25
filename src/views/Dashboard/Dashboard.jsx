@@ -41,7 +41,6 @@ class Dashboard extends React.Component {
   constructor(props, context) {
     super(props)
     this.globallyGeneratedTransactionObject = context.drizzle.contracts.PaymentPipe.methods.totalFunds();
-    console.log(context.drizzle.contracts.PaymentPipe)
     this.opcTokenTransactionObject = context.drizzle.contracts.OPCToken.methods.balanceOf(this.props.accounts[0]);
     
   }
