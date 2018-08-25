@@ -179,9 +179,19 @@ class Funding extends React.Component {
             </CardBody>
             <CardFooter chart>
               <div className={this.classes.stats}>
+              <GridItem xs={2} sm={2} md={1}>
+                <Button color="info" round onClick={() => this.approveApplication(application.applicationInstance)}>
+                      Approve Tokens!
+                </Button>
+            </GridItem>
+
+            <GridItem xs={2} sm={2} md={1}>
               <Button color="info" round onClick={() => this.voteForApplication(application.applicationInstance)}>
-                  Vote for this Application!
+                    Vote for this Application!
               </Button>
+            </GridItem>
+
+          
               </div>
             </CardFooter>
           </Card>
