@@ -119,11 +119,19 @@ contract PaymentPipe is AccessControl {
         externalAccount.transfer(totalToSend);
     }
 
-    function callExternalContractWithOnePercentTax(address externalAccount, string methodNameSignature) public payable {
+    // untrusted
+    function callUntrustedContractWithOnePercentTax(
+        address externalAccount, 
+        string methodNameSignature
+    ) public payable {
         uint onePercent = msg.value/100;
         uint totalToSend = msg.value - onePercent;
         externalContractAddress = externalAccount;
 
+        if (checkPaymentIsHighEnoughForToken()) {
+            totalFunds += onePercent;
+            opcToken.transfer(msg.sender, 1);
+        }
         //  I couldn't find a way to alter the amount of ether to send 
         // and delegate the call without using assembly code
         bytes4 sig = bytes4(keccak256(methodNameSignature));
@@ -148,10 +156,6 @@ contract PaymentPipe is AccessControl {
             }
 
             mstore(0x40, add(ptr, 0x24)) // Set storage pointer to new space
-        }
-        if (checkPaymentIsHighEnoughForToken()) {
-            totalFunds += onePercent;
-            opcToken.transfer(msg.sender, 1);
         }
     }
 

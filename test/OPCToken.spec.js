@@ -35,7 +35,7 @@ contract('OPCToken', function(accounts) {
         assert.equal(balance.toNumber(), 0);
         const externalAccount = await ExternalContractExample.deployed();
        
-        await paymentPipe.callExternalContractWithOnePercentTax(externalAccount.address, "paymentExample()", {from: alice, value: web3.toWei(1, "ether"), gasPrice: 0});
+        await paymentPipe.callUntrustedContractWithOnePercentTax(externalAccount.address, "paymentExample()", {from: alice, value: web3.toWei(1, "ether"), gasPrice: 0});
         const newBalance = await opcToken.balanceOf(alice)
         assert.equal(newBalance.toNumber(), 1);        
     });
