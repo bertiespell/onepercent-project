@@ -267,9 +267,8 @@ contract FundingApplications is AccessControl {
         );
     }
 
-    /** @dev this method calls selfdestruct() and removes the contract from the blockchain. 
-     * Access is limited to the CEO. 
-     */
+    /// @dev this method calls selfdestruct() and removes the contract from the blockchain. 
+    /// Access is limited to the CEO. 
     function kill() 
         public 
         onlyCEO 
@@ -278,10 +277,16 @@ contract FundingApplications is AccessControl {
         selfdestruct(this);
     }
 
-    function getVotingStatus() public view returns (bool) {
+    /// @dev returns whether the contract is currently open to votes
+    function getVotingStatus() 
+        public 
+        view 
+        returns (bool) 
+    {
         return votingOpen;
     }
 
+    /// @dev returns whether the contract is currently open to applications
     function getApplicationStatus() 
         public 
         view 
