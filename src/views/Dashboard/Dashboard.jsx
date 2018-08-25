@@ -2,9 +2,6 @@ import React from "react";
 import PropTypes from "prop-types";
 import { drizzleConnect } from 'drizzle-react'
 
-import PaymentPipe from "../../../build/contracts/PaymentPipe.json";
-import Web3 from 'web3'
-
 // @material-ui/core
 import withStyles from "@material-ui/core/styles/withStyles";
 import Grid from "@material-ui/core/Grid";

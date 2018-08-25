@@ -98,12 +98,12 @@ class Funding extends React.Component {
 
   async openApplications() {
     const gas = await this.openApplicationTransactionObject.estimateGas();
-    const result = await this.openApplicationTransactionObject.send({from: this.props.accounts[0], gas: gas*2})
+    await this.openApplicationTransactionObject.send({from: this.props.accounts[0], gas: gas*2})
   }
 
   async closeApplications() {
     const gas = await this.closeApplicationTransactionObject.estimateGas();
-    const result = await this.closeApplicationTransactionObject.send({from: this.props.accounts[0], gas: gas*2})
+    await this.closeApplicationTransactionObject.send({from: this.props.accounts[0], gas: gas*2})
   }
 
   async openVoting() {
@@ -151,7 +151,7 @@ class Funding extends React.Component {
   async approveApplication(contract) {
     const approvalObject = this.context.drizzle.contracts.OPCToken.methods.approve(contract._address, this.props.accounts[0]);
     const approvalGas = await approvalObject.estimateGas();
-    const approvalTransaction = await approvalObject.send({from: this.props.accounts[0], gas: approvalGas*2});
+    await approvalObject.send({from: this.props.accounts[0], gas: approvalGas*2});
   }
   
   async voteForApplication(contract) {
@@ -164,7 +164,7 @@ class Funding extends React.Component {
 
     const transactionalObject = contract.methods.voteForApplication(1);
     const gas = await transactionalObject.estimateGas();
-    const transaction = await transactionalObject.send({from: this.props.accounts[0], gas: gas*2});
+    await transactionalObject.send({from: this.props.accounts[0], gas: gas*2});
   }
     
   render() {
