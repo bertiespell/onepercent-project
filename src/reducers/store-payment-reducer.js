@@ -1,9 +1,10 @@
-import { STORE_PAYMENT, PAYMENT_SUCCESS, UPDATE_PAYMENT_AS_SUCCESSFUL } from '../actions/action-types.js';
+import { STORE_PAYMENT, PAYMENT_SUCCESS, UPDATE_PAYMENT_AS_SUCCESSFUL, SUBMIT_APPLICATION } from '../actions/action-types.js';
  
 const initialState = {
   paymentData: [],
   paymentValue: 0,
-  successfullTransactions: []
+  successfullTransactions: [],
+  applications: [],
 };
 
 const paymentDataReducer = (state = initialState, action) => {
@@ -28,7 +29,21 @@ const paymentDataReducer = (state = initialState, action) => {
         newTransactions[0] = "Success";
   
         newState.paymentData[action.data.paymentData] = newTransactions;
-        return state
+        return newState
+    }
+    case SUBMIT_APPLICATION: {
+      const newState = Object.assign({}, state);
+      
+      const applicationData = action.name;
+      const applicationDescription = action.description;
+      
+      const newApplication = {
+        applicationInstance: action.data,
+        name: applicationData,
+        description: applicationDescription,
+      };
+      newState.applications.push(newApplication);
+      return newState
     }
     default:
       return state;

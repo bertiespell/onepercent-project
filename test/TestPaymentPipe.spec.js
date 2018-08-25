@@ -59,7 +59,7 @@ contract('PaymentPipe', function(accounts) {
       var aliceBalanceBefore = await web3.eth.getBalance(alice).toNumber();
       var externalAccountBalanceBefore = await web3.eth.getBalance(externalAccount.address).toNumber();
 
-      await paymentPipe.callExternalContractWithOnePercentTax(externalAccount.address, "paymentExample()", {from: alice, value: value, gasPrice: 0});
+      await paymentPipe.callUntrustedContractWithOnePercentTax(externalAccount.address, "paymentExample()", {from: alice, value: value, gasPrice: 0});
       var externalAccountBalanceAfter = await web3.eth.getBalance(externalAccount.address).toNumber();
       var aliceBalanceAfter = await web3.eth.getBalance(alice).toNumber();
       assert.equal(externalAccountBalanceAfter, externalAccountBalanceBefore + (value - (value/100)), `The balance of the external account should increase by ${value}`);
@@ -78,7 +78,7 @@ contract('PaymentPipe', function(accounts) {
       const paymentPipeNewBalance = await opcToken.balanceOf(paymentPipe.address)
       assert.equal(paymentPipeNewBalance.toNumber(), paymentPipeBalance);
     });
-    it("should not give out OPC tokens when no ether is sent to callExternalContractWithOnePercentTax", async () => {
+    it("should not give out OPC tokens when no ether is sent to callUntrustedContractWithOnePercentTax", async () => {
       const externalAccount = await ExternalContractExample.deployed();
 
       const aliceBalance = await opcToken.balanceOf(alice);
@@ -86,9 +86,9 @@ contract('PaymentPipe', function(accounts) {
       const paymentPipeBalance = await opcToken.balanceOf(paymentPipe.address)
       assert.equal(paymentPipeBalance.toNumber(), 1000);
 
-      await paymentPipe.callExternalContractWithOnePercentTax(externalAccount.address, "paymentExample()", {from: alice, gasPrice: 0});
+      await paymentPipe.callUntrustedContractWithOnePercentTax(externalAccount.address, "paymentExample()", {from: alice, gasPrice: 0});
 
-      await paymentPipe.callExternalContractWithOnePercentTax(externalAccount.address, "paymentExample()", {from: alice, gasPrice: 0});
+      await paymentPipe.callUntrustedContractWithOnePercentTax(externalAccount.address, "paymentExample()", {from: alice, gasPrice: 0});
 
       const aliceNewBalance = await opcToken.balanceOf(alice)
       assert.equal(aliceNewBalance.toNumber(), aliceBalance);  
@@ -100,7 +100,7 @@ contract('PaymentPipe', function(accounts) {
 
       var paymentPipeValueBefore = await web3.eth.getBalance(paymentPipe.address).toNumber();
 
-      await paymentPipe.callExternalContractWithOnePercentTax(externalAccount.address, "paymentExample()", {from: alice, value: value, gasPrice: 0});
+      await paymentPipe.callUntrustedContractWithOnePercentTax(externalAccount.address, "paymentExample()", {from: alice, value: value, gasPrice: 0});
 
       var paymentPipeValueAfter = await web3.eth.getBalance(paymentPipe.address).toNumber();
 
