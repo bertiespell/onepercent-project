@@ -132,7 +132,7 @@ contract PaymentPipe is AccessControl {
     /// @dev sets the address of the funding application.
     /// This address is used in the modifier onlyFundingApplication above.
     /// This restricts access of certain methods (setting and paying winners) to the funding application address.
-    /// @param _fundingApplicationAddress
+    /// @param _fundingApplicationAddress the address of the funding application
     function setFundingApplicationAddress(address _fundingApplicationAddress) public onlyCLevel {
         fundingApplicationAddress = _fundingApplicationAddress;
         fundingApplicationAddressSet = true;
