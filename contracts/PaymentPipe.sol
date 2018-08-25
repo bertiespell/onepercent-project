@@ -5,7 +5,9 @@ import { OPCToken } from "./OPCToken.sol";
 import "./SafeMath.sol";
 
 
-/// @title the PaymentPipe is used to pass payments to users and external contracts. It passes on 99% of the original value and keeps 1% to use to fund projects. In return is dispenses OPCTokens, which a user is able to spend in order to vote for different applications.
+/// @title the PaymentPipe is used to pass payments to users and external contracts.
+/// It passes on 99% of the original value and keeps 1% to use to fund projects.
+/// In return is dispenses OPCTokens, which a user is able to spend in order to vote for different applications.
 contract PaymentPipe is AccessControl {
 
     using SafeMath for uint;
@@ -109,7 +111,9 @@ contract PaymentPipe is AccessControl {
         playersToPay.push(winner);
     }
 
-    /** @dev sets the address of the funding application. This address is used in the modifier onlyFundingApplication above. This restricts access of certain methods (setting and paying winners) to the funding application address.
+    /** @dev sets the address of the funding application.
+     * This address is used in the modifier onlyFundingApplication above.
+     * This restricts access of certain methods (setting and paying winners) to the funding application address.
      * @param _fundingApplicationAddress
      */
     function setFundingApplicationAddress(address _fundingApplicationAddress) public onlyCLevel {
@@ -118,15 +122,19 @@ contract PaymentPipe is AccessControl {
         emit NewFundingApplicationAddressSet(_fundingApplicationAddress);
     }
 
-    /** @dev sets a new minimum payment amount requires to receive an OPC token. This amount is checked in the payAccountWithOnePercentTax and callUntrustedContractWithOnePercentTax methods below.
-     * @param newAmount a uint representing the new minimum amount a user needs to send in order to receive a token from the payment pipe.
+    /** @dev sets a new minimum payment amount requires to receive an OPC token.
+     * This amount is checked in the payAccountWithOnePercentTax and callUntrustedContractWithOnePercentTax.
+     * @param newAmount a uint representing the new minimum amount required to receive a token from the payment pipe.
      */
     function setNewMinimumPayment(uint newAmount) public onlyCLevel {
         minimumPayment = newAmount;
         emit NewMinimumPaymentSet(newAmount);
     }
 
-    /** @dev this is the main method a user interacts with. They pass through the address that they ultimately want to pay. This methods passes 99% of the value on and keeps 1% within the payment pipe for later use to pay winners of the funding application
+    /** @dev this is the main method a user interacts with.
+     * They pass through the address that they ultimately want to pay.
+     * Passes 99% of the value on
+     * Keeps 1% within the payment pipe for later use to pay winners of the funding application
      * @param externalAccount an external account to pay
      */
     function payAccountWithOnePercentTax(address externalAccount) public payable {
@@ -139,7 +147,10 @@ contract PaymentPipe is AccessControl {
         externalAccount.transfer(totalToSend);
     }
 
-    /** @dev this is the other main method a user interacts with. They pass through the contract address that they ultimately want to pay. This methods passes 99% of the value on and keeps 1% within the payment pipe for later use to pay winners of the funding application.
+    /** @dev this is the other main method a user interacts with.
+     * They pass through the contract address that they ultimately want to pay.
+     * Passes 99% of the value on
+     * Keeps 1% within the payment pipe for later use to pay winners of the funding application.
      * UNTRUSTED
      * @param externalAccount an external account to pay
      * @param methodNameSignature is the signature of the method to call on the external contract.
@@ -183,19 +194,21 @@ contract PaymentPipe is AccessControl {
         }
     }
 
-    /** @dev used to retrieve the amount of funds that have been paid into the payment pipe. This is useful for the front-end to show the users globally generated amonut
+    /** @dev used to retrieve the amount of funds that have been paid into the payment pipe.
+     * This is useful for the front-end to show the users globally generated amount
      */
     function getTotalFunds() public view returns (uint) {
         return totalFunds;
     }
 
-    /** @dev this method calls selfdestruct() and removes the contract from the blockchain. Access is limited to the CEO. 
+    /** @dev this method calls selfdestruct() and removes the contract from the blockchain.
+     * Access is limited to the CEO. 
      */
     function kill() public onlyCEO {
         selfdestruct(this);
     }
 
-    /** @dev this internal method checks whether a user is attempting to transfer the minimum payment required to receive OPC tokens. 
+    /** @dev checks whether a user is attempting to transfer the minimum payment required to receive OPC tokens. 
      */
     function checkPaymentIsHighEnoughForToken() internal view returns (bool) {
         return msg.value >= minimumPayment;

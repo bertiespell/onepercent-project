@@ -120,7 +120,9 @@ contract FundingApplications is AccessControl {
                 highestVotes = votes;
                 addressesToPay = application.submissionAddress();
                 tiedResult = false;
-            } else if ((votes == highestVotes) && (votes > 0)) { // stops the first application with no votes from being counted
+            } else if (
+                (votes == highestVotes) && (votes > 0)
+            ) { // stops the first application with no votes from being counted
                 tiedAddresses.push(application.submissionAddress());
                 // emit Info(tiedResult);
                 tiedResult = true;
@@ -179,7 +181,8 @@ contract FundingApplications is AccessControl {
         );
     }
 
-    /** @dev this method calls selfdestruct() and removes the contract from the blockchain. Access is limited to the CEO. 
+    /** @dev this method calls selfdestruct() and removes the contract from the blockchain. 
+     * Access is limited to the CEO. 
      */
     function kill() public onlyCEO {
         selfdestruct(this);

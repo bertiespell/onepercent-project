@@ -112,7 +112,8 @@ contract Application is AccessControl {
         voteCount = voteCount + numberOfTokens;
     }
 
-    /** @dev this method calls selfdestruct() and removes the contract from the blockchain. Access is limited to the funding applications. 
+    /** @dev this method calls selfdestruct() and removes the contract from the blockchain.
+     * Access is limited to the funding applications. 
      */
     function kill() external isFundingApplication {
         selfdestruct(this);
