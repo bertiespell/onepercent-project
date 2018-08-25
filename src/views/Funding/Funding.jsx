@@ -127,20 +127,6 @@ class Funding extends React.Component {
     const data = await transactionObject.send({from: this.props.accounts[0], value: this.drizzle.web3.utils.toWei(String(0.004), "ether")});
     const applicationAddress = data.events.ApplicationSubmitted.address;
 
-    console.log(Application)
-    window.GLOBAL_BYTECODE = Application.deployedBytecode;
-
-    console.log(this.context, this.props);
-
-    var contractConfig = {
-      contractName: "Application",
-      web3Contract: new this.context.drizzle.web3.eth.Contract(Application.abi, applicationAddress)
-    }
-    const events = []
-    
-    this.context.drizzle.addContract({contractConfig, events})
-
-
     const web3Instance = new Web3(this.context.drizzle.web3.currentProvider);
 
     const application = new web3Instance.eth.Contract(Application.abi, applicationAddress);
@@ -155,13 +141,6 @@ class Funding extends React.Component {
   }
   
   async voteForApplication(contract) {
-    console.log('Attemping to vote', contract)
-
-    // this.fundingApplicationContract.methods.
-
-    // this is the first time we attempt to call a method on the application
-    // we set the provide above and I wonder if this might be wrong
-
     const transactionalObject = contract.methods.voteForApplication(1);
     const gas = await transactionalObject.estimateGas();
     await transactionalObject.send({from: this.props.accounts[0], gas: gas*2});
