@@ -16,10 +16,12 @@ contract Relay {
         owner = msg.sender; // this owner may be another contract with multisig, not a single contract owner
     }
 
+    /// @dev fallback function
     function() {
         require(currentVersion.delegatecall(msg.data));
     }
 
+    /// @dev used to change a contract's address
     function changeContract(address newVersion) public
     onlyOwner()
     {
