@@ -102,9 +102,12 @@ contract PaymentPipe is AccessControl {
     function payWinner(
         address winner
     ) 
-    external 
-    addressSetForFundingApplication 
-    onlyFundingApplication balanceIsNotZero {
+        external 
+        addressSetForFundingApplication 
+        onlyFundingApplication
+        balanceIsNotZero
+        whenNotPaused 
+    {
         uint paymentAmount = address(this).balance;
         winner.transfer(paymentAmount);
         emit WinnerPaid(winner, paymentAmount);
@@ -112,7 +115,13 @@ contract PaymentPipe is AccessControl {
 
     /// @dev transfers the balance to multiple winners. These must be set via the setMultipleWinners method below
     /// @return void
-    function payWinners() external addressSetForFundingApplication onlyFundingApplication balanceIsNotZero {
+    function payWinners() 
+        external 
+        addressSetForFundingApplication 
+        onlyFundingApplication 
+        balanceIsNotZero 
+        whenNotPaused 
+    {
         uint numberOfPlayers = winnersToPay.length;
         uint amountToPay = address(this).balance.div(numberOfPlayers);
         for (uint i = 0; i < numberOfPlayers; i++) {
@@ -125,7 +134,14 @@ contract PaymentPipe is AccessControl {
 
     /// @dev set multiple winners to pay. These can then be paid via the payWinners method above.
     /// @param winner A single winner address to pay. This may be called multiple times.
-    function setMultipleWinners(address winner) external addressSetForFundingApplication onlyFundingApplication {
+    function setMultipleWinners(
+        address winner
+    ) 
+        external 
+        addressSetForFundingApplication 
+        onlyFundingApplication 
+        whenNotPaused 
+    {
         winnersToPay.push(winner);
     }
 
@@ -133,7 +149,13 @@ contract PaymentPipe is AccessControl {
     /// This address is used in the modifier onlyFundingApplication above.
     /// This restricts access of certain methods (setting and paying winners) to the funding application address.
     /// @param _fundingApplicationAddress the address of the funding application
-    function setFundingApplicationAddress(address _fundingApplicationAddress) public onlyCLevel {
+    function setFundingApplicationAddress(
+        address _fundingApplicationAddress
+    ) 
+        public 
+        onlyCLevel 
+        whenNotPaused 
+    {
         fundingApplicationAddress = _fundingApplicationAddress;
         fundingApplicationAddressSet = true;
         emit NewFundingApplicationAddressSet(_fundingApplicationAddress);
@@ -142,7 +164,13 @@ contract PaymentPipe is AccessControl {
     /// @dev sets a new minimum payment amount requires to receive an OPC token.
     /// This amount is checked in the payAccountWithOnePercentTax and callUntrustedContractWithOnePercentTax.
     /// @param newAmount a uint representing the new minimum amount required to receive a token from the payment pipe.
-    function setNewMinimumPayment(uint newAmount) public onlyCLevel {
+    function setNewMinimumPayment(
+        uint newAmount
+    ) 
+        public 
+        onlyCLevel 
+        whenNotPaused 
+    {
         minimumPayment = newAmount;
         emit NewMinimumPaymentSet(newAmount);
     }
@@ -152,7 +180,13 @@ contract PaymentPipe is AccessControl {
     /// Passes 99% of the value on
     /// Keeps 1% within the payment pipe for later use to pay winners of the funding application
     /// @param externalAccount an external account to pay
-    function payAccountWithOnePercentTax(address externalAccount) public payable {
+    function payAccountWithOnePercentTax(
+        address externalAccount
+    ) 
+        public 
+        payable 
+        whenNotPaused 
+    {
         uint onePercent = msg.value/100;
         uint totalToSend = msg.value - onePercent;
         if (checkPaymentIsHighEnoughForToken()) {
@@ -172,7 +206,11 @@ contract PaymentPipe is AccessControl {
     function callUntrustedContractWithOnePercentTax(
         address externalAccount, 
         string methodNameSignature
-    ) public payable {
+    ) 
+        public 
+        payable 
+        whenNotPaused 
+    {
         uint onePercent = msg.value/100;
         uint totalToSend = msg.value - onePercent;
         externalContractAddress = externalAccount;
@@ -211,18 +249,29 @@ contract PaymentPipe is AccessControl {
     /// @dev used to retrieve the amount of funds that have been paid into the payment pipe.
     /// This is useful for the front-end to show the users globally generated amount
     /// @return uint of the total funds
-    function getTotalFunds() public view returns (uint) {
+    function getTotalFunds() 
+        public 
+        view 
+        returns (uint) 
+    {
         return totalFunds;
     }
 
     /// @dev this method calls selfdestruct() and removes the contract from the blockchain.
     /// Access is limited to the CEO. 
-    function kill() public onlyCEO {
+    function kill() 
+        public 
+        onlyCEO 
+    {
         selfdestruct(this);
     }
 
     /// @dev checks whether a user is attempting to transfer the minimum payment required to receive OPC tokens. 
-    function checkPaymentIsHighEnoughForToken() internal view returns (bool) {
+    function checkPaymentIsHighEnoughForToken() 
+        internal 
+        view 
+        returns (bool) 
+    {
         return msg.value >= minimumPayment;
     }
 }

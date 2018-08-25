@@ -17,7 +17,10 @@ contract ExternalContractExample {
     }
 
     /// @dev an example payable method to interact with the payment pipe
-    function paymentExample() public payable {
+    function paymentExample() 
+        public 
+        payable 
+    {
         totalPaidIn += msg.value;
         emit ExternalContractPaid("External Contract was paid!", msg.value);
     }

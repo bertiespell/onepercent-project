@@ -100,19 +100,31 @@ contract Application is AccessControl {
     
     /// @dev used to set new OPC Token address
     /// restricted to C level addresses
-    function setOPCTokenAddress(address tokenAddress) external onlyCLevel {
+    function setOPCTokenAddress(address tokenAddress) 
+        external 
+        onlyCLevel 
+        whenNotPaused
+    {
         opcTokenAddress = tokenAddress;
     }
 
     /// @dev used to set new Payment Pipe address
     /// restricted to C level addresses
-    function setPaymentPipeAddress(address pipeAddress) external onlyCLevel {
+    function setPaymentPipeAddress(address pipeAddress) 
+        external 
+        onlyCLevel 
+        whenNotPaused
+    {
         paymentPipeAddress = pipeAddress;
     }
 
     /// @dev opens the application to voting
     /// can only be called by the FundingApplication
-    function openApplicationToVoting() external isFundingApplicationsContract {
+    function openApplicationToVoting() 
+        external 
+        isFundingApplicationsContract 
+        whenNotPaused
+    {
         isOpenToVote = true;
         emit ApplicationOpenToVotes(
             applicationName,
@@ -122,7 +134,11 @@ contract Application is AccessControl {
 
     /// @dev closes the application to voting
     /// can only be called by the FundingApplication
-    function closeApplicationToVoting() external isFundingApplicationsContract {
+    function closeApplicationToVoting() 
+        external 
+        isFundingApplicationsContract 
+        whenNotPaused
+    {
         isOpenToVote = false;
         emit ApplicationClosedToVotes(
             applicationName,
@@ -135,16 +151,21 @@ contract Application is AccessControl {
     function voteForApplication(
         uint numberOfTokens
     ) 
-    external 
-    transferTokensToPaymentPipe(numberOfTokens)
-    votingIsOpen
+        external 
+        transferTokensToPaymentPipe(numberOfTokens)
+        votingIsOpen
+        whenNotPaused
     {
         voteCount = voteCount + numberOfTokens;
     }
 
     /// @dev this method calls selfdestruct() and removes the contract from the blockchain.
     /// Access is limited to the funding applications. 
-    function kill() external isFundingApplication {
+    function kill() 
+        external 
+        isFundingApplication 
+        whenNotPaused
+    {
         selfdestruct(this);
     }
 }

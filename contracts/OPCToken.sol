@@ -34,7 +34,11 @@ contract OPCToken is AccessControl, StandardToken {
     
     /// @dev this method calls selfdestruct() and removes the contract from the blockchain. 
     /// Access is limited to the CEO. 
-    function kill() public onlyCEO {
+    function kill() 
+        public 
+        onlyCEO
+        whenNotPaused 
+    {
         selfdestruct(this);
     }
 }
