@@ -1,6 +1,7 @@
 pragma solidity ^0.4.23;
 
 
+/// @title Relay handles upgrades to contracts and managers their address
 contract Relay {
     address public currentVersion;
     address public owner;

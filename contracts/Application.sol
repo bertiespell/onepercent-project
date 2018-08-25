@@ -1,9 +1,13 @@
 pragma solidity ^0.4.23;
 import "./AccessControl.sol";
 import { OPCToken } from "./OPCToken.sol";
+import "./SafeMath.sol";
 
 
+/// @title Encapsulates a users funding application data and the number of votes
 contract Application is AccessControl {
+
+    using SafeMath for uint256;
 
     address public submissionAddress;
 
@@ -108,6 +112,8 @@ contract Application is AccessControl {
         voteCount = voteCount + numberOfTokens;
     }
 
+    /** @dev this method calls selfdestruct() and removes the contract from the blockchain. Access is limited to the funding applications. 
+     */
     function kill() external isFundingApplication {
         selfdestruct(this);
     }

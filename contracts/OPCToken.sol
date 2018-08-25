@@ -5,6 +5,7 @@ import "./AccessControl.sol";
 import "../installed_contracts/zeppelin/contracts/token/StandardToken.sol";
 
 
+/// @title the OPCToken is awared to users for using the payment pipe
 contract OPCToken is AccessControl, StandardToken {
 
     address public owner;
@@ -22,8 +23,10 @@ contract OPCToken is AccessControl, StandardToken {
         balances[owner] = totalSupply;
         emit Transfer(address(0), owner, totalSupply);
     }
-        
-    function kill() public onlyCLevel {
+    
+    /** @dev this method calls selfdestruct() and removes the contract from the blockchain. Access is limited to the CEO. 
+     */
+    function kill() public onlyCEO {
         selfdestruct(this);
     }
 }

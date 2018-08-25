@@ -1,5 +1,7 @@
 pragma solidity ^0.4.24;
 
+
+/// @title A safe math library that deals with under and overflows.
 library SafeMath {
     function add(uint a, uint b) internal pure returns (uint c) {
         c = a + b;

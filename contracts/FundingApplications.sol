@@ -5,6 +5,7 @@ import "./Application.sol";
 import "./PaymentPipe.sol";
 
 
+/// @title FundingApplications managers users' applications and voting cycles
 contract FundingApplications is AccessControl {
     using SafeMath for uint256;
 
@@ -178,7 +179,9 @@ contract FundingApplications is AccessControl {
         );
     }
 
-    function kill() public onlyCLevel {
+    /** @dev this method calls selfdestruct() and removes the contract from the blockchain. Access is limited to the CEO. 
+     */
+    function kill() public onlyCEO {
         selfdestruct(this);
     }
 
