@@ -13,7 +13,7 @@ contract AccessControl {
     address public cfoAddress;
     address public cooAddress;
 
-    // @dev Keeps track whether the contract is paused. When that is true, most actions are blocked
+    /// @dev Keeps track whether the contract is paused. When that is true, most actions are blocked
     bool public paused = false;
 
     constructor() public {

@@ -98,12 +98,12 @@ class Funding extends React.Component {
 
   async openApplications() {
     const gas = await this.openApplicationTransactionObject.estimateGas();
-    const result = await this.openApplicationTransactionObject.send({from: this.props.accounts[0], gas: gas*2})
+    await this.openApplicationTransactionObject.send({from: this.props.accounts[0], gas: gas*2})
   }
 
   async closeApplications() {
     const gas = await this.closeApplicationTransactionObject.estimateGas();
-    const result = await this.closeApplicationTransactionObject.send({from: this.props.accounts[0], gas: gas*2})
+    await this.closeApplicationTransactionObject.send({from: this.props.accounts[0], gas: gas*2})
   }
 
   async openVoting() {
@@ -127,26 +127,6 @@ class Funding extends React.Component {
     const data = await transactionObject.send({from: this.props.accounts[0], value: this.drizzle.web3.utils.toWei(String(0.004), "ether")});
     const applicationAddress = data.events.ApplicationSubmitted.address;
 
-    console.log(Application)
-    window.GLOBAL_BYTECODE = Application.deployedBytecode;
-
-    console.log(this.context, this.props);
-
-    var contractConfig = {
-      contractName: "Application",
-      web3Contract: new this.context.drizzle.web3.eth.Contract(Application.abi, applicationAddress)
-    }
-    const events = []
-    
-    // // Using an action
-    // dispatch({type: 'ADD_CONTRACT', drizzle, contractConfig, events, web3})
-    
-    // Or using the Drizzle context object
-    this.context.drizzle.addContract({contractConfig, events})
-
-    console.log(this.context, this.props);
-
-    // var currentProvider = new Web3.providers.HttpProvider('http://localhost:7545'); 
     const web3Instance = new Web3(this.context.drizzle.web3.currentProvider);
 
     const application = new web3Instance.eth.Contract(Application.abi, applicationAddress);
@@ -157,20 +137,13 @@ class Funding extends React.Component {
   async approveApplication(contract) {
     const approvalObject = this.context.drizzle.contracts.OPCToken.methods.approve(contract._address, this.props.accounts[0]);
     const approvalGas = await approvalObject.estimateGas();
-    const approvalTransaction = await approvalObject.send({from: this.props.accounts[0], gas: approvalGas*2});
+    await approvalObject.send({from: this.props.accounts[0], gas: approvalGas*2});
   }
   
   async voteForApplication(contract) {
-    console.log('Attemping to vote', contract)
-
-    // this.fundingApplicationContract.methods.
-
-    // this is the first time we attempt to call a method on the application
-    // we set the provide above and I wonder if this might be wrong
-
     const transactionalObject = contract.methods.voteForApplication(1);
     const gas = await transactionalObject.estimateGas();
-    const transaction = await transactionalObject.send({from: this.props.accounts[0], gas: gas*2});
+    await transactionalObject.send({from: this.props.accounts[0], gas: gas*2});
   }
     
   render() {

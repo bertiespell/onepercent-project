@@ -571,7 +571,6 @@ contract('FundingApplications', function(accounts) {
 
         // these should all error now since selfdestuct has now been called
 
-        // console.log('what is this actually', fundingApplication.proposals(0))
         let error1;
         try {
             const firstIsOpenEvenLater = await application1Instance.isOpenToVote();

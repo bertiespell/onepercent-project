@@ -2,9 +2,6 @@ import React from "react";
 import PropTypes from "prop-types";
 import { drizzleConnect } from 'drizzle-react'
 
-import PaymentPipe from "../../../build/contracts/PaymentPipe.json";
-import Web3 from 'web3'
-
 // @material-ui/core
 import withStyles from "@material-ui/core/styles/withStyles";
 import Grid from "@material-ui/core/Grid";
@@ -41,7 +38,6 @@ class Dashboard extends React.Component {
   constructor(props, context) {
     super(props)
     this.globallyGeneratedTransactionObject = context.drizzle.contracts.PaymentPipe.methods.totalFunds();
-    console.log(context.drizzle.contracts.PaymentPipe)
     this.opcTokenTransactionObject = context.drizzle.contracts.OPCToken.methods.balanceOf(this.props.accounts[0]);
     
   }

@@ -27,6 +27,8 @@ import Button from 'components/CustomButtons/Button.jsx';
 
 import getRandomInt from '../../utils/maths/getRandomNumber';
 
+const ethereum_port = process.env.REACT_APP_ETHEREUM_NODE_PORT;
+
 const styles = {
   cardCategoryWhite: {
     "&,& a,& a:hover,& a:focus": {
@@ -108,7 +110,7 @@ class Payments extends React.Component {
   }
 
   async findGanacheAccounts() {
-    this.availableGanacheAccounts = await new Web3(new Web3.providers.HttpProvider('http://localhost:7545')).eth.getAccounts();
+    this.availableGanacheAccounts = await new Web3(new Web3.providers.HttpProvider(`http://localhost:${ethereum_port}`)).eth.getAccounts();
   }
 
   async payContract() {

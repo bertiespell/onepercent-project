@@ -8,7 +8,7 @@ const drizzleOptions = {
     block: false,
     fallback: {
       type: 'ws',
-      url: 'ws://127.0.0.1:process.env.ETHEREUM_NODE_PORT'
+      url: 'ws://127.0.0.1:process.env.REACT_APP_ETHEREUM_NODE'
     }
   },
   contracts: [
