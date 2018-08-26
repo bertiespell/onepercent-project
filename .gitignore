@@ -1,6 +1,5 @@
 node_modules
 documentation
-yarn.lock
 .DS_Store
 src/.DS_Store
 Notes
