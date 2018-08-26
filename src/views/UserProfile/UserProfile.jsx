@@ -13,7 +13,7 @@ import CardAvatar from "components/Card/CardAvatar.jsx";
 import CardBody from "components/Card/CardBody.jsx";
 import CardFooter from "components/Card/CardFooter.jsx";
 
-import avatar from "assets/img/faces/marc.jpg";
+import avatar from "assets/img/faces/me.jpg";
 
 const styles = {
   cardCategoryWhite: {
@@ -157,8 +157,8 @@ function UserProfile(props) {
               </a>
             </CardAvatar>
             <CardBody profile>
-              <h6 className={classes.cardCategory}>CEO / CO-FOUNDER</h6>
-              <h4 className={classes.cardTitle}>Alec Thompson</h4>
+              <h6 className={classes.cardCategory}>FOUNDER</h6>
+              <h4 className={classes.cardTitle}>Bertie Spell</h4>
               <p className={classes.description}>
               This is a placeholder to manage uPort integration.
               </p>

@@ -85,6 +85,21 @@ It is recommended that for testing you use the first account (i.e. account[0]), 
 
 Now you can navigate to: http://localhost:3000/
 
+### General User Flow / Marking
+
+It is recommended to follow the following flow:
+
+1) Make a Payment via the payments tab (observe metamask interaction and the effects on ganache-cli)
+2) Return to the Dashboard (observe the data is updated from the blockchain)
+3) Go to the Funding tab
+4) Select open applications (observe metamask interaction and the effects on ganache-cli)
+5) Select submit application (observe metamask interaction and the effects on ganache-cli)
+6) Close applications
+7) Open voting
+8) Approve tokens
+9) Vote for application
+10) Close voting
+
 ## Debugging
 
 If you encounter problems when running the application it may be necessary to ensure that your metamask account is synced with ganache-cli. If there are errors in the console try:

@@ -1,0 +1,18 @@
+{
+    "package_name": "one-percent-package",
+    "version": "0.0.1",
+    "description": "Example of Redistributive Economics",
+    "authors": [
+      "Bertie Spell <bertiespell@gmail.com>"
+    ],
+    "keywords": [
+      "solidity",
+      "ethereum",
+      "smart",
+      "contracts",
+      "security",
+      "redistributive-economics"
+    ],
+    "license": "MIT"
+  }
+  
