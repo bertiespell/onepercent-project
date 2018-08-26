@@ -102,21 +102,26 @@ It is recommended to follow the following flow:
 
 ## Debugging
 
-If you encounter problems when running the application it may be necessary to ensure that your metamask account is synced with ganache-cli. If there are errors in the console try:
+If you encounter problems when running the application it may be necessary to ensure that your metamask account is synced with ganache-cli. If there are errors in the console try the following steps in order:
 
-1) Compile and migrate the contracts again:
+1) Reset ganache-cli - check it is running on port 8545
+2) Check that the contracts are compiled and migrated onto the blockchain:
 
-```bash
-truffle compile --all
-truffle migrate --reset
-```
+    ```bash
+    truffle compile --all
+    truffle migrate --reset
+    ```
+3) Check that metamask is running with port 8545
 
-2) Restart the development server
+4) Check that you are using the correct account as output by ganache-cli:
+    - When ganache-cli starts copy the **first private key** it outputs
+    - Go to metamask and select import account - use this private key
 
-```bash
-npm start
-```
+5) Reset your metamask accout
+    -> Go to metamask, select settings and then "reset account'.
 
-3) Reset your metamask accout
+6) Restart the development server
 
--> Go to metamask, select settings and then "reset account'.
+    ```bash
+    yarn start
+    ```
