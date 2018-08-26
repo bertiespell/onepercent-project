@@ -29,12 +29,19 @@ Once applications are open, the user may then submit an application. Please note
 To run this project you will need to have installed
 
 1) node
-2) ganache-cli
-3) truffle
+2) npm
+3) ganache-cli
+4) truffle
 
 To interact with the project via the front-end you will need 
 
 4) metamask
+
+You will also need to download yarn **before** you install. This is because the yarn.lock file is used to manage the dependencies that the project relies on. You can use npm to install yarn like so:
+
+```bash
+npm i -g yarn
+```
 
 First make sure that ganache-cli is running on port 8545 by running the following in a terminal:
 
@@ -60,9 +67,11 @@ In order to run the front-end application the node modules need to be installed 
 ``` bash
 git clone https://github.com/bertiespell/onepercent-project.git
 cd onepercent-project
-npm install
-npm start
+yarn install
+yarn start
 ```
+
+If you encounter compilation errors here first check that you have run the truffle commands above (the compiled code relies upon the output of the truffle compile command (for the contract ABI)).
 
 You will need to make sure that metamask is configured to run on port 8545 (to match the where the blockchain is being hosted by ganache-cli):
 
