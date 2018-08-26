@@ -23,7 +23,6 @@ class HeaderLinks extends React.Component {
     open: false
   };
   handleClick = () => {
-    // this.setState({ open: !this.state.open });
   };
 
   handleClose = () => {
@@ -75,11 +74,6 @@ class HeaderLinks extends React.Component {
               className={classes.buttonLink}
             >
               <Notifications className={classes.icons} />
-              <Hidden mdUp>
-                {/* <p onClick={this.handleClick} className={classes.linkText}>
-                  Notification
-                </p> */}
-              </Hidden>
             </Button>
           </Target>
           <Popper
