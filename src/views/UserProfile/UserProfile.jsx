@@ -157,8 +157,8 @@ function UserProfile(props) {
               </a>
             </CardAvatar>
             <CardBody profile>
-              <h6 className={classes.cardCategory}>CEO / CO-FOUNDER</h6>
-              <h4 className={classes.cardTitle}>Alec Thompson</h4>
+              <h6 className={classes.cardCategory}>FOUNDER</h6>
+              <h4 className={classes.cardTitle}>Bertie Spell</h4>
               <p className={classes.description}>
               This is a placeholder to manage uPort integration.
               </p>

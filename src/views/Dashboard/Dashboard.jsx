@@ -10,8 +10,6 @@ import ContentCopy from "@material-ui/icons/ContentCopy";
 import Store from "@material-ui/icons/Store";
 import InfoOutline from "@material-ui/icons/InfoOutline";
 import Warning from "@material-ui/icons/Warning";
-import DateRange from "@material-ui/icons/DateRange";
-import LocalOffer from "@material-ui/icons/LocalOffer";
 import Update from "@material-ui/icons/Update";
 import Accessibility from "@material-ui/icons/Accessibility";
 // core components
@@ -68,10 +66,6 @@ class Dashboard extends React.Component {
     this.opcBalance = await this.opcTokenTransactionObject.call();
   }
 
-  async findAccounts() {
-    this.contracts.TutorialToken.methods.transfer(this.contracts.TutorialToken.address, 1000).send()
-  }
-
   render() {
     const { classes } = this.props;
     return (
@@ -93,8 +87,8 @@ class Dashboard extends React.Component {
                   <Danger>
                     <Warning />
                   </Danger>
-                  <a href="#pablo" onClick={() => this.findAccounts()}>
-                    Get more space
+                  <a href="#pablo">
+                    Counted per Session
                   </a>
                 </div>
               </CardFooter>
@@ -113,8 +107,8 @@ class Dashboard extends React.Component {
               </CardHeader>
               <CardFooter stats>
                 <div className={classes.stats}>
-                  <DateRange />
-                  Last 24 Hours
+                <Update />
+                  Via the Blockchain
                 </div>
               </CardFooter>
             </Card>
@@ -130,8 +124,10 @@ class Dashboard extends React.Component {
               </CardHeader>
               <CardFooter stats>
                 <div className={classes.stats}>
-                  <LocalOffer />
-                  Tracked from Github
+                <Danger>
+                    <Warning />
+                  </Danger>
+                  Session Payments
                 </div>
               </CardFooter>
             </Card>
@@ -150,7 +146,7 @@ class Dashboard extends React.Component {
               <CardFooter stats>
                 <div className={classes.stats}>
                   <Update />
-                  Just Updated
+                  Updated from the Blockchain
                 </div>
               </CardFooter>
             </Card>
