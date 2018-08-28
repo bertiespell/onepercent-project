@@ -90,6 +90,7 @@ Now you can navigate to: http://localhost:3000/
 It is recommended to follow the following flow:
 
 1) Make a Payment via the payments tab (observe metamask interaction and the effects on ganache-cli)
+   **Here you will see the address of the current account in the payments tab, as well as the address it is sending to**
 2) Return to the Dashboard (observe the data is updated from the blockchain)
 3) Go to the Funding tab
 4) Select open applications (observe metamask interaction and the effects on ganache-cli)
