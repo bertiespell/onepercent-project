@@ -1,0 +1,4 @@
+src/*
+truffle-config.js
+truffle.js
+yarn.lock
