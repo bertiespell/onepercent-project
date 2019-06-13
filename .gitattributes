@@ -1,4 +1,6 @@
 src/* linguist-vendored
+config/* linguist-vendored
+scripts/* linguist-vendored
 truffle-config.js linguist-vendored
 truffle.js linguist-vendored
 yarn.lock linguist-vendored
